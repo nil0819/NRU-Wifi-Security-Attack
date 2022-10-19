@@ -141,119 +141,95 @@ NS_LOG_COMPONENT_DEFINE ("LaaWifiIndoor");
 
 // Global Values are used in place of command line arguments so that these
 // values may be managed in the ns-3 ConfigStore system.
-static ns3::GlobalValue g_duration ("duration",
-                                    "Data transfer duration (seconds)",
-                                    ns3::DoubleValue (2),
-                                    ns3::MakeDoubleChecker<double> ());
+static ns3::GlobalValue g_duration ("duration", "Data transfer duration (seconds)",
+                                    ns3::DoubleValue (2), ns3::MakeDoubleChecker<double> ());
 
-static ns3::GlobalValue g_cellConfigA ("cellConfigA",
-                                       "Lte, Wifi, or Laa",
-                                        ns3::EnumValue (WIFI),
-                                        ns3::MakeEnumChecker (WIFI, "Wifi",
-                                                              LTE, "Lte",
-                                                              LAA, "Laa"));
-static ns3::GlobalValue g_cellConfigB ("cellConfigB",
-                                       "Lte, Wifi, or Laa",
-                                        ns3::EnumValue (WIFI),
-                                        ns3::MakeEnumChecker (WIFI, "Wifi",
-                                                              LTE, "Lte",
-                                                              LAA, "Laa"));
+/* Rashed Nov 26, 2021
+* changing Cell A to LTE
+*/
+static ns3::GlobalValue g_cellConfigA ("cellConfigA", "Lte, Wifi, or Laa", ns3::EnumValue (LAA),
+                                       ns3::MakeEnumChecker (WIFI, "Wifi", LTE, "Lte", LAA, "Laa"));
+static ns3::GlobalValue g_cellConfigB ("cellConfigB", "Lte, Wifi, or Laa", ns3::EnumValue (WIFI),
+                                       ns3::MakeEnumChecker (WIFI, "Wifi", LTE, "Lte", LAA, "Laa"));
 
-static ns3::GlobalValue g_channelAccessManager ("ChannelAccessManager",
-                                                "Default, DutyCycle, Lbt",
+static ns3::GlobalValue g_channelAccessManager ("ChannelAccessManager", "Default, DutyCycle, Lbt",
                                                 ns3::EnumValue (Lbt),
-                                                ns3::MakeEnumChecker (Default, "Default",
-                                                                      DutyCycle, "DutyCycle",
-                                                                      Lbt, "Lbt"));
+                                                ns3::MakeEnumChecker (Default, "Default", DutyCycle,
+                                                                      "DutyCycle", Lbt, "Lbt"));
 
-static ns3::GlobalValue g_lbtTxop ("lbtTxop",
-                                   "TxOp for LBT devices (ms)",
-                                   ns3::DoubleValue (8.0),
+static ns3::GlobalValue g_lbtTxop ("lbtTxop", "TxOp for LBT devices (ms)", ns3::DoubleValue (8.0),
                                    ns3::MakeDoubleChecker<double> (4.0, 20.0));
 
-static ns3::GlobalValue g_useReservationSignal ("useReservationSignal",
-                                                "Defines whether reservation signal will be used when used channel access manager at LTE eNb",
-                                                ns3::BooleanValue (true),
-                                                ns3::MakeBooleanChecker ());
+static ns3::GlobalValue g_useReservationSignal (
+    "useReservationSignal",
+    "Defines whether reservation signal will be used when used channel access manager at LTE eNb",
+    ns3::BooleanValue (true), ns3::MakeBooleanChecker ());
 
 static ns3::GlobalValue g_laaEdThreshold ("laaEdThreshold",
-                                   "CCA-ED threshold for channel access manager (dBm)",
-                                   ns3::DoubleValue (-72.0),
-                                   ns3::MakeDoubleChecker<double> (-100.0, -50.0));
+                                          "CCA-ED threshold for channel access manager (dBm)",
+                                          ns3::DoubleValue (-72.0),
+                                          ns3::MakeDoubleChecker<double> (-100.0, -50.0));
 
-static ns3::GlobalValue g_pcap ("pcapEnabled",
-                                "Whether to enable pcap trace files for Wi-Fi",
-                                ns3::BooleanValue (false),
-                                ns3::MakeBooleanChecker ());
+static ns3::GlobalValue g_pcap ("pcapEnabled", "Whether to enable pcap trace files for Wi-Fi",
+                                ns3::BooleanValue (false), ns3::MakeBooleanChecker ());
 
-static ns3::GlobalValue g_ascii ("asciiEnabled",
-                                "Whether to enable ascii trace files for Wi-Fi",
-                                ns3::BooleanValue (false),
-                                ns3::MakeBooleanChecker ());
+static ns3::GlobalValue g_ascii ("asciiEnabled", "Whether to enable ascii trace files for Wi-Fi",
+                                 ns3::BooleanValue (false), ns3::MakeBooleanChecker ());
 
-static ns3::GlobalValue g_transport ("transport",
-                                     "whether to use 3GPP Ftp, Udp, or Tcp",
+static ns3::GlobalValue g_transport ("transport", "whether to use 3GPP Ftp, Udp, or Tcp",
                                      ns3::EnumValue (UDP),
-                                     ns3::MakeEnumChecker (FTP, "Ftp",
-                                                           UDP, "Udp",
-                                                           TCP, "Tcp"));
+                                     ns3::MakeEnumChecker (FTP, "Ftp", UDP, "Udp", TCP, "Tcp"));
 
-static ns3::GlobalValue g_lteDutyCycle ("lteDutyCycle",
-                                    "Duty cycle value to be used for LTE",
-                                    ns3::DoubleValue (1),
-                                    ns3::MakeDoubleChecker<double> (0.0, 1.0));
+static ns3::GlobalValue g_lteDutyCycle ("lteDutyCycle", "Duty cycle value to be used for LTE",
+                                        ns3::DoubleValue (1),
+                                        ns3::MakeDoubleChecker<double> (0.0, 1.0));
 
-static ns3::GlobalValue g_bsSpacing ("bsSpacing",
-                                    "Spacing (in meters) between the closest two base stations of different operators",
-                                    ns3::DoubleValue (5),
-                                    ns3::MakeDoubleChecker<double> (1.0, 12.5));
+/* Rashed Nov 26, 2021
+* Change the bsSpacing Value to make the APs extremely closer
+*/
+static ns3::GlobalValue
+    g_bsSpacing ("bsSpacing",
+                 "Spacing (in meters) between the closest two base stations of different operators",
+                 ns3::DoubleValue (4), ns3::MakeDoubleChecker<double> (1.0, 12.5));
 
-static ns3::GlobalValue g_bsCornerPlacement ("bsCornerPlacement",
-                                    "Rather than place base stations along axis according to TR36.889, place in corners instead",
-                                    ns3::BooleanValue (false),
-                                    ns3::MakeBooleanChecker ());
-
+static ns3::GlobalValue g_bsCornerPlacement (
+    "bsCornerPlacement",
+    "Rather than place base stations along axis according to TR36.889, place in corners instead",
+    ns3::BooleanValue (false), ns3::MakeBooleanChecker ());
 
 // Higher lambda means faster arrival rate; values [0.5, 1, 1.5, 2, 2.5]
 // recommended
-static ns3::GlobalValue g_ftpLambda ("ftpLambda",
-                                    "Lambda value for FTP model 1 application",
-                                    ns3::DoubleValue (0.5),
-                                    ns3::MakeDoubleChecker<double> ());
+static ns3::GlobalValue g_ftpLambda ("ftpLambda", "Lambda value for FTP model 1 application",
+                                     ns3::DoubleValue (0.5), ns3::MakeDoubleChecker<double> ());
 
-static ns3::GlobalValue g_voiceEnabled ("voiceEnabled",
-                                       "Whether to enable voice",
-                                       ns3::BooleanValue (false),
-                                       ns3::MakeBooleanChecker ());
+static ns3::GlobalValue g_voiceEnabled ("voiceEnabled", "Whether to enable voice",
+                                        ns3::BooleanValue (false), ns3::MakeBooleanChecker ());
 
-static ns3::GlobalValue g_generateRem ("generateRem",
-                                       "if true, will generate a REM and then abort the simulation;"
-                                       "if false, will run the simulation normally (without generating any REM)",
-                                       ns3::BooleanValue (false),
-                                       ns3::MakeBooleanChecker ());
+static ns3::GlobalValue
+    g_generateRem ("generateRem",
+                   "if true, will generate a REM and then abort the simulation;"
+                   "if false, will run the simulation normally (without generating any REM)",
+                   ns3::BooleanValue (false), ns3::MakeBooleanChecker ());
 
-static ns3::GlobalValue g_simTag ("simTag",
-                                  "tag to be appended to output filenames to distinguish simulation campaigns",
-                                  ns3::StringValue ("default"),
-                                  ns3::MakeStringChecker ());
+static ns3::GlobalValue
+    g_simTag ("simTag",
+              "tag to be appended to output filenames to distinguish simulation campaigns",
+              ns3::StringValue ("default"), ns3::MakeStringChecker ());
 
-static ns3::GlobalValue g_outputDir ("outputDir",
-                                     "directory where to store simulation results",
-                                     ns3::StringValue ("./"),
-                                     ns3::MakeStringChecker ());
+static ns3::GlobalValue g_outputDir ("outputDir", "directory where to store simulation results",
+                                     ns3::StringValue ("./"), ns3::MakeStringChecker ());
 
-static ns3::GlobalValue g_cwUpdateRule ("cwUpdateRule",
-                                         "Rule that will be used to update contention window of LAA node",
-                                         ns3::EnumValue (LbtAccessManager::NACKS_80_PERCENT),
-                                         ns3::MakeEnumChecker (ns3::LbtAccessManager::ALL_NACKS, "all",
-                                        		 	 	 	   ns3::LbtAccessManager::ANY_NACK, "any",
-                                        		 	 	 	   ns3::LbtAccessManager::NACKS_10_PERCENT, "nacks10",
-                                        		 	 	 	   ns3::LbtAccessManager::NACKS_80_PERCENT, "nacks80"));
+static ns3::GlobalValue g_cwUpdateRule (
+    "cwUpdateRule", "Rule that will be used to update contention window of LAA node",
+    ns3::EnumValue (LbtAccessManager::NACKS_80_PERCENT),
+    ns3::MakeEnumChecker (ns3::LbtAccessManager::ALL_NACKS, "all", ns3::LbtAccessManager::ANY_NACK,
+                          "any", ns3::LbtAccessManager::NACKS_10_PERCENT, "nacks10",
+                          ns3::LbtAccessManager::NACKS_80_PERCENT, "nacks80"));
 
 static ns3::GlobalValue g_indoorLossModel ("indoorLossModel",
                                            "TypeId string of indoor propagation loss model",
-                                            ns3::StringValue ("ns3::ItuInhPropagationLossModel"),
-                                            ns3::MakeStringChecker ());
+                                           ns3::StringValue ("ns3::ItuInhPropagationLossModel"),
+                                           ns3::MakeStringChecker ());
 
 int
 main (int argc, char *argv[])
@@ -269,8 +245,15 @@ main (int argc, char *argv[])
   // This program has two operators, and nominally 4 cells per operator
   // and 5 UEs per cell.  These variables can be tuned below for
   // e.g. debugging on a smaller scale scenario
+
+  /* Rashed Nov 26, 2021
+  * Making changes to the number of cells and UEs
+  * This is a configurable code. Keeping the actual value commented so that I can change them back
+  */
   //uint32_t numUePerCell = 5;
-  uint32_t numCells = 4;
+  //uint32_t numCells = 10;
+  // uint32_t numUePerCell = 5;
+  // uint32_t numCells = 4;
 
   // Some debugging settings not exposed as command line args are below
 
@@ -284,7 +267,8 @@ main (int argc, char *argv[])
   BooleanValue booleanValue;
   StringValue stringValue;
   GlobalValue::GetValueByName ("ChannelAccessManager", enumValue);
-  enum Config_ChannelAccessManager channelAccessManager = (Config_ChannelAccessManager) enumValue.Get ();
+  enum Config_ChannelAccessManager channelAccessManager =
+      (Config_ChannelAccessManager) enumValue.Get ();
   GlobalValue::GetValueByName ("cellConfigA", enumValue);
   enum Config_e cellConfigA = (Config_e) enumValue.Get ();
   GlobalValue::GetValueByName ("cellConfigB", enumValue);
@@ -301,9 +285,9 @@ main (int argc, char *argv[])
   GlobalValue::GetValueByName ("lteDutyCycle", doubleValue);
   double lteDutyCycle = doubleValue.Get ();
   GlobalValue::GetValueByName ("bsSpacing", doubleValue);
-  //double bsSpacing = doubleValue.Get ();
-  GlobalValue::GetValueByName ("bsCornerPlacement", booleanValue);
-  //bool bsCornerPlacement = booleanValue.Get ();
+  // double bsSpacing = doubleValue.Get ();
+  // GlobalValue::GetValueByName ("bsCornerPlacement", booleanValue);
+  // bool bsCornerPlacement = booleanValue.Get ();
   GlobalValue::GetValueByName ("generateRem", booleanValue);
   bool generateRem = booleanValue.Get ();
   GlobalValue::GetValueByName ("simTag", stringValue);
@@ -313,7 +297,8 @@ main (int argc, char *argv[])
   GlobalValue::GetValueByName ("useReservationSignal", booleanValue);
   bool useReservationSignal = booleanValue.Get ();
   GlobalValue::GetValueByName ("cwUpdateRule", enumValue);
-  enum  LbtAccessManager::CWUpdateRule_t cwUpdateRule = (LbtAccessManager::CWUpdateRule_t) enumValue.Get ();
+  enum LbtAccessManager::CWUpdateRule_t cwUpdateRule =
+      (LbtAccessManager::CWUpdateRule_t) enumValue.Get ();
 
   GlobalValue::GetValueByName ("asciiEnabled", booleanValue);
   if (booleanValue.Get () == true)
@@ -323,20 +308,25 @@ main (int argc, char *argv[])
   GlobalValue::GetValueByName ("indoorLossModel", stringValue);
   std::string indoorLossModel = stringValue.Get ();
 
-  Config::SetDefault ("ns3::LteChannelAccessManager::EnergyDetectionThreshold", DoubleValue (laaEdThreshold));
+  Config::SetDefault ("ns3::LteChannelAccessManager::EnergyDetectionThreshold",
+                      DoubleValue (laaEdThreshold));
   switch (channelAccessManager)
     {
     case Lbt:
-      Config::SetDefault ("ns3::LaaWifiCoexistenceHelper::ChannelAccessManagerType", StringValue ("ns3::LbtAccessManager"));
-      Config::SetDefault ("ns3::LbtAccessManager::Txop", TimeValue (Seconds (lbtTxop/1000.0)));
-      Config::SetDefault ("ns3::LbtAccessManager::UseReservationSignal", BooleanValue(useReservationSignal));
-      Config::SetDefault ("ns3::LbtAccessManager::CwUpdateRule", EnumValue(cwUpdateRule));
+      Config::SetDefault ("ns3::LaaWifiCoexistenceHelper::ChannelAccessManagerType",
+                          StringValue ("ns3::LbtAccessManager"));
+      Config::SetDefault ("ns3::LbtAccessManager::Txop", TimeValue (Seconds (lbtTxop / 1000.0)));
+      Config::SetDefault ("ns3::LbtAccessManager::UseReservationSignal",
+                          BooleanValue (useReservationSignal));
+      Config::SetDefault ("ns3::LbtAccessManager::CwUpdateRule", EnumValue (cwUpdateRule));
       break;
     case DutyCycle:
-      Config::SetDefault ("ns3::LaaWifiCoexistenceHelper::ChannelAccessManagerType", StringValue ("ns3::DutyCycleAccessManager"));
+      Config::SetDefault ("ns3::LaaWifiCoexistenceHelper::ChannelAccessManagerType",
+                          StringValue ("ns3::DutyCycleAccessManager"));
       Config::SetDefault ("ns3::DutyCycleAccessManager::OnDuration", TimeValue (MilliSeconds (60)));
-      Config::SetDefault ("ns3::DutyCycleAccessManager::OnStartTime",TimeValue (MilliSeconds (0)));
-      Config::SetDefault ("ns3::DutyCycleAccessManager::DutyCyclePeriod",TimeValue (MilliSeconds (80)));
+      Config::SetDefault ("ns3::DutyCycleAccessManager::OnStartTime", TimeValue (MilliSeconds (0)));
+      Config::SetDefault ("ns3::DutyCycleAccessManager::DutyCyclePeriod",
+                          TimeValue (MilliSeconds (80)));
       break;
     default:
       //default LTE channel access manager will be used, LTE always transmits
@@ -353,134 +343,229 @@ main (int argc, char *argv[])
   //
 
   // Allocate 4 BS for nodes
+
+  //std::cout << "Number of Cells" << numCells << std::endl;
+
   NodeContainer bsNodesA;
-  bsNodesA.Create (numCells);
+  bsNodesA.Create (3);
   NodeContainer bsNodesB;
-  bsNodesB.Create (1);
+  bsNodesB.Create (1); //numCells);
 
   //
   // Create bounding box 120m x 50m
 
   // BS mobility helper
   MobilityHelper mobilityBs;
-  MobilityHelper mobilityAP;
+  MobilityHelper mobilityBs_Mobile_Wifi;
+  Ptr<RandomRectanglePositionAllocator> bs_allocator =
+      CreateObject<RandomRectanglePositionAllocator> ();
+
+  // Ptr<UniformRandomVariable> bs_xPos = CreateObject<UniformRandomVariable> ();
+  // bs_xPos->SetAttribute ("Min", DoubleValue (16));
+  // bs_xPos->SetAttribute ("Max", DoubleValue (72));
+  // bs_allocator->SetX (bs_xPos);
+
+  // Ptr<UniformRandomVariable> bs_yPos = CreateObject<UniformRandomVariable> ();
+  // bs_yPos->SetAttribute ("Min", DoubleValue (0));
+  // bs_yPos->SetAttribute ("Max", DoubleValue (60));
+  // bs_allocator->SetY (bs_yPos);
+  Ptr<ListPositionAllocator> initialAlloc = CreateObject<ListPositionAllocator> ();
+
+  initialAlloc->Add (Vector (32, 28, 0));
+  initialAlloc->Add (Vector (96, 28, 0));
+  initialAlloc->Add (Vector (32, 84, 0));
+  // initialAlloc->Add (Vector (1536, 1088, 0));
+  // initialAlloc->Add (Vector (768, 1728, 0));
+  // initialAlloc->Add (Vector (1280, 1728, 0));
+
+  //bs_allocator->AssignStreams (1); // assign consistent stream number to r.vars.
+  mobilityBs.SetPositionAllocator (initialAlloc);
+  mobilityBs.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  mobilityBs.Install (bsNodesA);
+
+  Ptr<ListPositionAllocator> initialAlloc_wifibs = CreateObject<ListPositionAllocator> ();
+  initialAlloc_wifibs->Add (Vector (94, 28, 0));
+  mobilityBs_Mobile_Wifi.SetPositionAllocator (initialAlloc_wifibs);
+  mobilityBs_Mobile_Wifi.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  mobilityBs_Mobile_Wifi.Install (bsNodesB);
+
+  // mobilityBs.SetPositionAllocator ("ns3::GridPositionAllocator", "MinX", DoubleValue (318), "MinY",
+  //                                  DoubleValue (544), "DeltaX", DoubleValue (25), "LayoutType",
+  //                                  StringValue ("RowFirst"));
+  //mobilityBs.Install (bsNodesB);
+
+  // mobilityBs_Mobile_Wifi.SetPositionAllocator (
+  //     "ns3::GridPositionAllocator", "MinX", DoubleValue (16), "MinY", DoubleValue (16), "DeltaX",
+  //     DoubleValue (25), "LayoutType", StringValue ("RowFirst"));
+
+  // mobilityBs_Mobile_Wifi.SetMobilityModel ("ns3::RandomWalk2dMobilityModel",
+  //                            "Mode", StringValue ("Time"),
+  //                            "Time", StringValue ("2s"),
+  //                            "Speed", StringValue ("ns3::ConstantRandomVariable[Constant=1.0]"),
+  //                            "Bounds", StringValue ("0|80|0|120"));
+  //mobilityBs_Mobile_Wifi.Install (bsNodesB);
+
   // if (bsCornerPlacement == false)
   //   {
-  //     // Place operator A's BS at coordinates (20,25), (45,25), (70,25), (95,25)
-  //     mobilityBs.SetPositionAllocator ("ns3::GridPositionAllocator",
-  //                                     "MinX", DoubleValue (20),
-  //                                     "MinY", DoubleValue (25),
-  //                                     "DeltaX", DoubleValue (25),
-  //                                     "LayoutType", StringValue ("RowFirst"));
+  //     /* Rashed Nov 26 2021
+  //     * This i the BS placement code. Commenting the actual code so that I can change them back
+  //     * I will be adding more deployment scenarios of the APs and BSs. 1X1 2X2 3X3 4X4 5X5 6X6
+  //     */
+
+  //     /* Rashed Nov 26 2021
+  //     * My first case is 1X1. The AP and the BS would be at the center (58,25) and  (62,25)
+  //     */
+  //     // Place operator A's BS at coordinates (60,25)
+  //     mobilityBs.SetPositionAllocator ("ns3::GridPositionAllocator", "MinX", DoubleValue (58),
+  //                                      "MinY", DoubleValue (25), "DeltaX", DoubleValue (15),
+  //                                      "LayoutType", StringValue ("RowFirst"));
   //     mobilityBs.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   //     mobilityBs.Install (bsNodesA);
   //     // The offset between the base stations of operators A and B is governed
   //     // by the global value bsSpacing;
-  //     // Place operator B's BS at coordinates (20 + bsSpacing ,25), (45,25), (70,25), (95,25)
-  //     mobilityBs.SetPositionAllocator ("ns3::GridPositionAllocator",
-  //                                     "MinX", DoubleValue (20 + bsSpacing),
-  //                                     "MinY", DoubleValue (25),
-  //                                     "DeltaX", DoubleValue (25),
-  //                                     "LayoutType", StringValue ("RowFirst"));
+  //     // Place operator B's BS at coordinates (60 + bsSpacing ,25)
+  //     mobilityBs.SetPositionAllocator (
+  //         "ns3::GridPositionAllocator", "MinX", DoubleValue (58 + bsSpacing), "MinY",
+  //         DoubleValue (25), "DeltaX", DoubleValue (25), "LayoutType", StringValue ("RowFirst"));
   //     mobilityBs.Install (bsNodesB);
+  //     // // Place operator A's BS at coordinates (20,25), (45,25), (70,25), (95,25)
+  //     // mobilityBs.SetPositionAllocator ("ns3::GridPositionAllocator",
+  //     //                                 "MinX", DoubleValue (20),
+  //     //                                 "MinY", DoubleValue (25),
+  //     //                                 "DeltaX", DoubleValue (25),
+  //     //                                 "LayoutType", StringValue ("RowFirst"));
+  //     // mobilityBs.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  //     // mobilityBs.Install (bsNodesA);
+  //     // // The offset between the base stations of operators A and B is governed
+  //     // // by the global value bsSpacing;
+  //     // // Place operator B's BS at coordinates (20 + bsSpacing ,25), (45,25), (70,25), (95,25)
+  //     // mobilityBs.SetPositionAllocator ("ns3::GridPositionAllocator",
+  //     //                                 "MinX", DoubleValue (20 + bsSpacing),
+  //     //                                 "MinY", DoubleValue (25),
+  //     //                                 "DeltaX", DoubleValue (25),
+  //     //                                 "LayoutType", StringValue ("RowFirst"));
+  //     // mobilityBs.Install (bsNodesB);
   //   }
   // else
   //   {
   //     // Place BS at the corners (0,0), (120,0), (0,50), (120,50)
-  //     mobilityBs.SetPositionAllocator ("ns3::GridPositionAllocator",
-  //                                     "MinX", DoubleValue (0),
-  //                                     "MinY", DoubleValue (0),
-  //                                     "GridWidth", UintegerValue (2),
-  //                                     "DeltaX", DoubleValue (120),
-  //                                     "DeltaY", DoubleValue (50),
-  //                                     "LayoutType", StringValue ("RowFirst"));
-  //     mobilityBs.SetMobi9lityModel ("ns3::ConstantPositionMobilityModel");
+  //     mobilityBs.SetPositionAllocator ("ns3::GridPositionAllocator", "MinX", DoubleValue (0),
+  //                                      "MinY", DoubleValue (0), "GridWidth", UintegerValue (2),
+  //                                      "DeltaX", DoubleValue (120), "DeltaY", DoubleValue (50),
+  //                                      "LayoutType", StringValue ("RowFirst"));
+  //     mobilityBs.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   //     mobilityBs.Install (bsNodesA);
   //     // place BS at the corners (1,1), (119,1), (1,49), (119,49)
-  //     mobilityBs.SetPositionAllocator ("ns3::GridPositionAllocator",
-  //                                     "MinX", DoubleValue (1),
-  //                                     "MinY", DoubleValue (1),
-  //                                     "GridWidth", UintegerValue (2),
-  //                                     "DeltaX", DoubleValue (118),
-  //                                     "DeltaY", DoubleValue (48),
-  //                                     "LayoutType", StringValue ("RowFirst"));
+  //     mobilityBs.SetPositionAllocator ("ns3::GridPositionAllocator", "MinX", DoubleValue (30),
+  //                                      "MinY", DoubleValue (38), "GridWidth", UintegerValue (2),
+  //                                      "DeltaX", DoubleValue (118), "DeltaY", DoubleValue (48),
+  //                                      "LayoutType", StringValue ("RowFirst"));
   //     mobilityBs.Install (bsNodesB);
   //   }
-
-Ptr<ListPositionAllocator> positionAllocLTE = CreateObject<ListPositionAllocator> ();
-
-
-
-positionAllocLTE->Add (Vector (10.0, 10.0, 0.0));
-positionAllocLTE->Add (Vector (30.0, 10.0, 0.0));
-positionAllocLTE->Add (Vector (10.0, 30.0, 0.0));
-positionAllocLTE->Add (Vector (30.0, 30.0, 0.0));
-
-mobilityBs.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-
-mobilityBs.SetPositionAllocator (positionAllocLTE);
-
-mobilityBs.Install(bsNodesA);
-
-Ptr<ListPositionAllocator> positionAllocAP = CreateObject<ListPositionAllocator> ();
-
-positionAllocAP->Add(Vector(20.0,20.0,0.0));
-
-mobilityAP.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-
-mobilityAP.Install(bsNodesB);
-
-
-
-
-
+  /*Rashed Nov 29, 2021 
+  */
   // Allocate UE for each cell
   NodeContainer ueNodesA;
-  ueNodesA.Create (10);//numUePerCell * numCells);
+  ueNodesA.Create (12); //numUePerCell * numCells);
   NodeContainer ueNodesB;
-  ueNodesB.Create (4);
+  ueNodesB.Create (4); //numUePerCell * numCells);
 
   // UE mobility helper
   MobilityHelper mobilityUe;
-  MobilityHelper mobilityDev;
-  Ptr<RandomRectanglePositionAllocator> allocator = CreateObject<RandomRectanglePositionAllocator> ();
-  Ptr<UniformRandomVariable> xPos = CreateObject<UniformRandomVariable> ();
-  xPos->SetAttribute ("Min", DoubleValue (0));
-  xPos->SetAttribute ("Max", DoubleValue (40));
-  allocator->SetX (xPos);
-  Ptr<UniformRandomVariable> yPos = CreateObject<UniformRandomVariable> ();
-  yPos->SetAttribute ("Min", DoubleValue (0));
-  yPos->SetAttribute ("Max", DoubleValue (40));
-  allocator->SetY (yPos);
-  allocator->AssignStreams (1); // assign consistent stream number to r.vars.
-  mobilityUe.SetPositionAllocator (allocator);
+  // Ptr<RandomRectanglePositionAllocator> allocator =
+  //     CreateObject<RandomRectanglePositionAllocator> ();
+  Ptr<ListPositionAllocator> lte_initialAlloc = CreateObject<ListPositionAllocator> ();
+  lte_initialAlloc->Add (Vector (32, 24, 0));
+  lte_initialAlloc->Add (Vector (32, 32, 0));
+  lte_initialAlloc->Add (Vector (28, 28, 0));
+  lte_initialAlloc->Add (Vector (96, 24, 0));
+  lte_initialAlloc->Add (Vector (96, 32, 0));
+  lte_initialAlloc->Add (Vector (92, 28, 0));
+  lte_initialAlloc->Add (Vector (32, 80, 0));
+  lte_initialAlloc->Add (Vector (32, 88, 0));
+  lte_initialAlloc->Add (Vector (28, 84, 0));
+  // lte_initialAlloc->Add (Vector (96, 80, 0));
+  // lte_initialAlloc->Add (Vector (96, 88, 0));
+  // lte_initialAlloc->Add (Vector (92, 84, 0));
+  // lte_initialAlloc->Add (Vector (1028, 1088, 0));
+  // lte_initialAlloc->Add (Vector (1536, 1084, 0));
+  // lte_initialAlloc->Add (Vector (1536, 1092, 0));
+  // lte_initialAlloc->Add (Vector (1532, 1088, 0));
+  // lte_initialAlloc->Add (Vector (1540, 1088, 0));
+  // lte_initialAlloc->Add (Vector (768, 1724, 0));
+  // lte_initialAlloc->Add (Vector (768, 1732, 0));
+  // lte_initialAlloc->Add (Vector (764, 1728, 0));
+  // lte_initialAlloc->Add (Vector (772, 1728, 0));
+  // lte_initialAlloc->Add (Vector (1280, 1724, 0));
+  // lte_initialAlloc->Add (Vector (1280, 1732, 0));
+  // lte_initialAlloc->Add (Vector (1276, 1728, 0));
+  // lte_initialAlloc->Add (Vector (1284, 1728, 0));
+
+  Ptr<ListPositionAllocator> wifi_initialAlloc =
+    CreateObject<ListPositionAllocator> ();
+
+    wifi_initialAlloc->Add (Vector(98, 24, 0));
+    wifi_initialAlloc->Add (Vector(98, 32, 0));
+    wifi_initialAlloc->Add (Vector(90, 28, 0));
+    // wifi_initialAlloc->Add (Vector(92, 28, 0));
+  //   wifi_initialAlloc->Add (Vector(80,16,0));
+  //   wifi_initialAlloc->Add (Vector(0,56,0));
+  //   wifi_initialAlloc->Add (Vector(48,40,0));
+  //   wifi_initialAlloc->Add (Vector(96,56,0));
+  //   wifi_initialAlloc->Add (Vector(16,96,0));
+  //   wifi_initialAlloc->Add (Vector(80,96,0));
+
+  /*Rashed Nov 26 2021
+  * I will make changes so that all the devices are close by
+  */
+
+  // Ptr<UniformRandomVariable> xPos = CreateObject<UniformRandomVariable> ();
+  // xPos->SetAttribute ("Min", DoubleValue (16));
+  // xPos->SetAttribute ("Max", DoubleValue (80));
+  // allocator->SetX (xPos);
+  // Ptr<UniformRandomVariable> yPos = CreateObject<UniformRandomVariable> ();
+  // yPos->SetAttribute ("Min", DoubleValue (16));
+  // yPos->SetAttribute ("Max", DoubleValue (120));
+  // allocator->SetY (yPos);
+  // Ptr<UniformRandomVariable> xPos = CreateObject<UniformRandomVariable> ();
+  // xPos->SetAttribute ("Min", DoubleValue (0));
+  // xPos->SetAttribute ("Max", DoubleValue (120));
+  // allocator->SetX (xPos);
+  // Ptr<UniformRandomVariable> yPos = CreateObject<UniformRandomVariable> ();
+  // yPos->SetAttribute ("Min", DoubleValue (0));
+  // yPos->SetAttribute ("Max", DoubleValue (50));
+  // allocator->SetY (yPos);
+
+  //allocator->AssignStreams (1); // assign consistent stream number to r.vars.
+  mobilityUe.SetPositionAllocator (lte_initialAlloc);
   mobilityUe.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  mobilityDev.SetMobilityModel("ns3::ConstantPositionMobilityModel");
   mobilityUe.Install (ueNodesA);
 
-Ptr<ListPositionAllocator> positionAllocWiFiDev = CreateObject<ListPositionAllocator> ();
+  // My own Wifi Node setup
+  // Ptr<UniformRandomVariable> wifi_xPos = CreateObject<UniformRandomVariable> ();
+  // wifi_xPos->SetAttribute ("Min", DoubleValue (60));
+  // wifi_xPos->SetAttribute ("Max", DoubleValue (64));
+  // allocator->SetX (wifi_xPos);
 
-positionAllocWiFiDev->Add(Vector(11.0,10.0,0.0));
-positionAllocWiFiDev->Add(Vector(29.0,10.0,0.0));
-positionAllocWiFiDev->Add(Vector(10.0,29.0,0.0));
-positionAllocWiFiDev->Add(Vector(29.0,30.0,0.0));
+  // Ptr<UniformRandomVariable> wifi_yPos = CreateObject<UniformRandomVariable> ();
+  // wifi_yPos->SetAttribute ("Min", DoubleValue (24));
+  // wifi_yPos->SetAttribute ("Max", DoubleValue (28));
+  // allocator->SetX (wifi_yPos);
 
-mobilityDev.SetPositionAllocator(positionAllocWiFiDev);
-
-mobilityBs.Install(ueNodesB);
-
-
+  //allocator->AssignStreams (1); // assign consistent stream number to r.vars.
+  mobilityUe.SetPositionAllocator (wifi_initialAlloc);
+  mobilityUe.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   mobilityUe.Install (ueNodesB);
 
-
   // REM settings tuned to get a nice figure for this specific scenario
-  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::OutputFile", StringValue ("laa-wifi-indoor.rem"));
+  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::OutputFile",
+                      StringValue ("laa-wifi-indoor.rem"));
   Config::SetDefault ("ns3::RadioEnvironmentMapHelper::XMin", DoubleValue (0));
   Config::SetDefault ("ns3::RadioEnvironmentMapHelper::XMax", DoubleValue (120));
   Config::SetDefault ("ns3::RadioEnvironmentMapHelper::YMin", DoubleValue (0));
-  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::YMax", DoubleValue (50));
-  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::XRes", UintegerValue (1200));
-  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::YRes", UintegerValue (500));
+  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::YMax", DoubleValue (120));
+  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::XRes", UintegerValue (120));
+  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::YRes", UintegerValue (120));
   Config::SetDefault ("ns3::RadioEnvironmentMapHelper::Z", DoubleValue (1.5));
 
   std::ostringstream simulationParams;
@@ -488,16 +573,19 @@ mobilityBs.Install(ueNodesB);
 
   // Specify some physical layer parameters that will be used in scenario helper
   PhyParams phyParams;
-  phyParams.m_bsTxGain = 1; // dB antenna gain
-  phyParams.m_bsRxGain = 1; // dB antenna gain
-  phyParams.m_bsTxPower = 3; // dBm
+  phyParams.m_bsTxGain = 0; // dB antenna gain //
+  phyParams.m_bsRxGain = 0; // dB antenna gain
+  phyParams.m_bsTxPower = 1; // dBm
   phyParams.m_bsNoiseFigure = 5; // dB
   phyParams.m_ueTxGain = 0; // dB antenna gain
   phyParams.m_ueRxGain = 0; // dB antenna gain
-  phyParams.m_ueTxPower = 1; // dBm
-  phyParams.m_ueNoiseFigure = 1; // dB
+  phyParams.m_ueTxPower = 0; // dBm
+  phyParams.m_ueNoiseFigure = 5; // dB
 
-  ConfigureAndRunScenario (cellConfigA, cellConfigB, bsNodesA, bsNodesB, ueNodesA, ueNodesB, phyParams, durationTime, transport, indoorLossModel, disableApps, lteDutyCycle, generateRem, outputDir + "/laa_wifi_indoor_" + simTag, simulationParams.str ());
+  ConfigureAndRunScenario (cellConfigA, cellConfigB, bsNodesA, bsNodesB, ueNodesA, ueNodesB,
+                           phyParams, durationTime, transport, indoorLossModel, disableApps,
+                           lteDutyCycle, generateRem, outputDir + "/laa_wifi_indoor_" + simTag,
+                           simulationParams.str ());
 
   return 0;
 }
