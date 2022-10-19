@@ -65,22 +65,35 @@ transport=Udp
 # TXOP duration (ms) for LAA
 lbtTxop=8
 # Base simulation duration (seconds); scaled below
-base_duration=10
+base_duration=2
 # Enable voice instead of FTP on two UEs
 voiceEnabled=1
 # Set to value '0' for LAA SISO, '2' for LAA MIMO
 laaTxMode=2
 
+#for udpRate in 155Mbps ; do
+#    for energyDetection in -72.0 ; do
+#        for cell in Laa ; do
+#            # Make the simulation duration inversly proportional to ftpLambda
+#            duration=$base_duration
+#            simTag="eD_${energyDetection}_udpRate_${udpRate}_cellA_${cell}"
+#            /usr/bin/time -f '%e %U %S %K %M %x %C' -o "${outputDir}"/time_stats -a \
+#            ./waf --run laa-wifi-indoor-brach-attack --command="%s --cellConfigA=${cell} --cellConfigB=Wifi --lbtTxop=${lbtTxop} --logWifiRetries=1 --logWifiFailRetries=1 --logPhyArrivals=1 --logPhyNodeId=${logNodeId} --transport=${transport} --udpRate=${udpRate} --duration=${duration} --cwUpdateRule=nacks80 --logHarqFeedback=1 --logTxops=1 --logCwChanges=1 --logBackoffChanges=1 --laaEdThreshold=${energyDetection} --simTag=${simTag} --outputDir=${outputDir} --voiceEnabled=${voiceEnabled} --ns3::LteEnbRrc::DefaultTransmissionMode=${laaTxMode} --RngRun=${RngRun}"
+#        done
+#    done
+#done
+
 for udpRate in 155Mbps ; do
-    for energyDetection in -72.0 ; do
-        for cell in Laa ; do
-            # Make the simulation duration inversly proportional to ftpLambda
-            duration=$base_duration
-            simTag="eD_${energyDetection}_udpRate_${udpRate}_cellA_${cell}"
-            /usr/bin/time -f '%e %U %S %K %M %x %C' -o "${outputDir}"/time_stats -a \
-            ./waf --run laa-wifi-indoor-brach-attack --command="%s --cellConfigA=${cell} --cellConfigB=Wifi --lbtTxop=${lbtTxop} --logWifiRetries=1 --logWifiFailRetries=1 --logPhyArrivals=1 --logPhyNodeId=${logNodeId} --transport=${transport} --udpRate=${udpRate} --duration=${duration} --cwUpdateRule=nacks80 --logHarqFeedback=1 --logTxops=1 --logCwChanges=1 --logBackoffChanges=1 --laaEdThreshold=${energyDetection} --simTag=${simTag} --outputDir=${outputDir} --voiceEnabled=${voiceEnabled} --ns3::LteEnbRrc::DefaultTransmissionMode=${laaTxMode} --RngRun=${RngRun}"
-        done
-    done
+	for energyDetection in -72.0  ; do
+		 for cell in Laa ; do
+		 	for RngRun in 12 13 14 15 16 17 18 19 20 21; do
+		 		 duration=$base_duration
+		 		 simTag="eD_${energyDetection}_udpRate_${udpRate}_cellA_${cell}"
+		 		 /usr/bin/time -f '%e %U %S %K %M %x %C' -o "${outputDir}"/time_stats -a \
+            			./waf --run laa-wifi-indoor-brach-attack --command="%s --cellConfigA=Laa --cellConfigB=Wifi --lbtTxop=${lbtTxop} --logWifiRetries=1 --logWifiFailRetries=1 --logPhyArrivals=1 --logPhyNodeId=${logNodeId} --transport=${transport} --udpRate=${udpRate} --duration=${duration} --cwUpdateRule=nacks80 --spreadUdpLoad=0 --logHarqFeedback=1 --logTxops=1 --logCwChanges=1 --logBackoffChanges=1 --laaEdThreshold=${energyDetection} --simTag=${simTag} --outputDir=${outputDir}  --ns3::LteEnbRrc::DefaultTransmissionMode=${laaTxMode} --logBackoffNodeId=1  --RngRun=${RngRun} --logAssociationStats=1"
+            		done
+            	done
+	done
 done
 
 # for udpRate in 75Kbps 200Kbps 400Kbps ; do

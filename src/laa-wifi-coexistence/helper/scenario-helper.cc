@@ -19,6 +19,8 @@
  * Authors: Nicola Baldo <nbaldo@cttc.es> and Tom Henderson <tomh@tomh.org>
  */
 
+#include "ns3/netanim-module.h"
+
 #include "scenario-helper.h"
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
@@ -81,191 +83,197 @@ static ns3::GlobalValue g_simulationLingerTimeSeconds ("simulationLingerTimeSeco
                                                        ns3::DoubleValue (1),
                                                        ns3::MakeDoubleChecker<double> ());
 
-static ns3::GlobalValue g_remDir ("remDir",
-                                  "directory where to save REM-related output files",
-                                  ns3::StringValue ("./"),
-                                  ns3::MakeStringChecker ());
+static ns3::GlobalValue g_remDir ("remDir", "directory where to save REM-related output files",
+                                  ns3::StringValue ("./"), ns3::MakeStringChecker ());
 
-static ns3::GlobalValue g_lbtChannelAccessManagerInstallTime ("lbtChannelAccessManagerInstallTime",
-                                                              "LTE channel access manager install time (seconds)",
-                                                              ns3::DoubleValue (2),
-                                                              ns3::MakeDoubleChecker<double> ());
+static ns3::GlobalValue
+    g_lbtChannelAccessManagerInstallTime ("lbtChannelAccessManagerInstallTime",
+                                          "LTE channel access manager install time (seconds)",
+                                          ns3::DoubleValue (2), ns3::MakeDoubleChecker<double> ());
 
 static ns3::GlobalValue g_logWifiRetries ("logWifiRetries",
-                                              "Log when a data packet requires a retry",
-                                              ns3::BooleanValue (false),
-                                              ns3::MakeBooleanChecker ());
+                                          "Log when a data packet requires a retry",
+                                          ns3::BooleanValue (false), ns3::MakeBooleanChecker ());
 
-static ns3::GlobalValue g_logWifiFailRetries ("logWifiFailRetries",
-                                              "Log when a data packet fails to be retransmitted successfully and is discarded",
-                                              ns3::BooleanValue (false),
-                                              ns3::MakeBooleanChecker ());
+static ns3::GlobalValue g_logWifiFailRetries (
+    "logWifiFailRetries",
+    "Log when a data packet fails to be retransmitted successfully and is discarded",
+    ns3::BooleanValue (false), ns3::MakeBooleanChecker ());
 
-static ns3::GlobalValue g_logPhyNodeId ("logPhyNodeId",
-                                        "Node index of specific node to filter logPhyArrivals (default will log all nodes)",
-                                        ns3::UintegerValue (UINT32_MAX),
-                                        ns3::MakeUintegerChecker<uint32_t> ());
+static ns3::GlobalValue g_logPhyNodeId (
+    "logPhyNodeId",
+    "Node index of specific node to filter logPhyArrivals (default will log all nodes)",
+    ns3::UintegerValue (UINT32_MAX), ns3::MakeUintegerChecker<uint32_t> ());
 
-static ns3::GlobalValue g_logTxopNodeId ("logTxopNodeId",
-                                        "Node index of specific node to filter logTxops (default will log all nodes)",
-                                        ns3::UintegerValue (UINT32_MAX),
-                                        ns3::MakeUintegerChecker<uint32_t> ());
+static ns3::GlobalValue
+    g_logTxopNodeId ("logTxopNodeId",
+                     "Node index of specific node to filter logTxops (default will log all nodes)",
+                     ns3::UintegerValue (UINT32_MAX), ns3::MakeUintegerChecker<uint32_t> ());
 
-static ns3::GlobalValue g_logPhyArrivals ("logPhyArrivals",
-                                          "Whether to write logfile of signal arrivals to SpectrumWifiPhy",
-                                          ns3::BooleanValue (false),
-                                          ns3::MakeBooleanChecker ());
+static ns3::GlobalValue
+    g_logPhyArrivals ("logPhyArrivals",
+                      "Whether to write logfile of signal arrivals to SpectrumWifiPhy",
+                      ns3::BooleanValue (false), ns3::MakeBooleanChecker ());
 
 static ns3::GlobalValue g_logTxops ("logTxops",
-                                          "Whether to write logfile of txop opportunities of eNb",
-                                          ns3::BooleanValue (false),
-                                          ns3::MakeBooleanChecker ());
+                                    "Whether to write logfile of txop opportunities of eNb",
+                                    ns3::BooleanValue (false), ns3::MakeBooleanChecker ());
 
 static ns3::GlobalValue g_logDataTx ("logDataTx",
-                                          "Whether to write logfile when data is transmitted at eNb",
-                                          ns3::BooleanValue (false),
-                                          ns3::MakeBooleanChecker ());
+                                     "Whether to write logfile when data is transmitted at eNb",
+                                     ns3::BooleanValue (false), ns3::MakeBooleanChecker ());
 
 static ns3::GlobalValue g_logCwChanges ("logCwChanges",
                                         "Whether to write logfile of contention window changes",
-                                        ns3::BooleanValue (false),
-                                        ns3::MakeBooleanChecker ());
+                                        ns3::BooleanValue (false), ns3::MakeBooleanChecker ());
 
-static ns3::GlobalValue g_logCwNodeId ("logCwNodeId",
-                                        "Node index of specific node to filter logCwChanges (default will log all nodes)",
-                                        ns3::UintegerValue (UINT32_MAX),
-                                        ns3::MakeUintegerChecker<uint32_t> ());
+static ns3::GlobalValue g_logCwNodeId (
+    "logCwNodeId",
+    "Node index of specific node to filter logCwChanges (default will log all nodes)",
+    ns3::UintegerValue (UINT32_MAX), ns3::MakeUintegerChecker<uint32_t> ());
 
 static ns3::GlobalValue g_logBackoffChanges ("logBackoffChanges",
                                              "Whether to write logfile of backoff values drawn",
-                                             ns3::BooleanValue (false),
-                                             ns3::MakeBooleanChecker ());
+                                             ns3::BooleanValue (false), ns3::MakeBooleanChecker ());
 
-static ns3::GlobalValue g_logBackoffNodeId ("logBackoffNodeId",
-                                            "Node index of specific node to filter logBackoffChanges (default will log all nodes)",
-                                            ns3::UintegerValue (UINT32_MAX),
-                                            ns3::MakeUintegerChecker<uint32_t> ());
+static ns3::GlobalValue g_logBackoffNodeId (
+    "logBackoffNodeId",
+    "Node index of specific node to filter logBackoffChanges (default will log all nodes)",
+    ns3::UintegerValue (UINT32_MAX), ns3::MakeUintegerChecker<uint32_t> ());
 
-static ns3::GlobalValue g_logHarqFeedbackNodeId ("logHarqFeedbackNodeId",
-                                                 "Node index of specific node to filter HARQ feedbacks (default will log all nodes)",
-                                                 ns3::UintegerValue (UINT32_MAX),
-                                                 ns3::MakeUintegerChecker<uint32_t> ());
+static ns3::GlobalValue g_logHarqFeedbackNodeId (
+    "logHarqFeedbackNodeId",
+    "Node index of specific node to filter HARQ feedbacks (default will log all nodes)",
+    ns3::UintegerValue (UINT32_MAX), ns3::MakeUintegerChecker<uint32_t> ());
 
-static ns3::GlobalValue g_logBeaconNodeId ("logBeaconNodeId",
-                                           "Node index of specific node to filter logBeaconArrivals (default will log all nodes)",
-                                           ns3::UintegerValue (UINT32_MAX),
-                                           ns3::MakeUintegerChecker<uint32_t> ());
+static ns3::GlobalValue g_logBeaconNodeId (
+    "logBeaconNodeId",
+    "Node index of specific node to filter logBeaconArrivals (default will log all nodes)",
+    ns3::UintegerValue (UINT32_MAX), ns3::MakeUintegerChecker<uint32_t> ());
 
-static ns3::GlobalValue g_logBeaconArrivals ("logBeaconArrivals",
-                                             "Whether to write logfile of beacon arrivals to STA devices",
-                                             ns3::BooleanValue (false),
-                                             ns3::MakeBooleanChecker ());
+static ns3::GlobalValue
+    g_logBeaconArrivals ("logBeaconArrivals",
+                         "Whether to write logfile of beacon arrivals to STA devices",
+                         ns3::BooleanValue (false), ns3::MakeBooleanChecker ());
 
 static ns3::GlobalValue g_logCtrlSignals ("logCtrlSignals",
                                           "Whether to write logfile of CTRL signals sent by enbs",
-                                          ns3::BooleanValue (false),
-                                          ns3::MakeBooleanChecker ());
+                                          ns3::BooleanValue (false), ns3::MakeBooleanChecker ());
 
-static ns3::GlobalValue g_logHarqFeedbacks ("logHarqFeedback",
-                                          "Whether to write logfile of HARQ feedbacks per each subframe.",
-                                          ns3::BooleanValue (false),
-                                          ns3::MakeBooleanChecker ());
+static ns3::GlobalValue
+    g_logHarqFeedbacks ("logHarqFeedback",
+                        "Whether to write logfile of HARQ feedbacks per each subframe.",
+                        ns3::BooleanValue (false), ns3::MakeBooleanChecker ());
 
 static ns3::GlobalValue g_logReservationSignals ("logReservationSignals",
                                                  "Whether to write logfile of reservation signals",
                                                  ns3::BooleanValue (false),
                                                  ns3::MakeBooleanChecker ());
 
-static ns3::GlobalValue g_logAssociationStats ("logAssociationStats",
-                                               "Whether to write logfile of WiFi association and LAA/LTE eNB and UE association",
-                                               ns3::BooleanValue (false),
-                                               ns3::MakeBooleanChecker ());
+static ns3::GlobalValue g_logAssociationStats (
+    "logAssociationStats",
+    "Whether to write logfile of WiFi association and LAA/LTE eNB and UE association",
+    ns3::BooleanValue (true), ns3::MakeBooleanChecker ());
 
 // 150 Mb/s will saturate LAA and WiFi MIMO 2x2:2 20 MHz
 static const uint64_t UDP_SATURATION_RATE = 150000000;
 
-static ns3::GlobalValue g_udpRate ("udpRate",
-                                   "Data rate of UDP application",
+static ns3::GlobalValue g_udpRate ("udpRate", "Data rate of UDP application",
                                    ns3::DataRateValue (DataRate (UDP_SATURATION_RATE)),
                                    ns3::MakeDataRateChecker ());
 
-static ns3::GlobalValue g_udpSize ("udpPacketSize",
-                                   "Packet size of UDP application",
+static ns3::GlobalValue g_udpSize ("udpPacketSize", "Packet size of UDP application",
                                    ns3::UintegerValue (1000),
                                    ns3::MakeUintegerChecker<uint32_t> ());
 
-static ns3::GlobalValue g_spreadUdpLoad ("spreadUdpLoad",
-                                         "optimization to try to spread a saturating UDP load across multiple UE and cells",
-                                         ns3::BooleanValue (false),
-                                         ns3::MakeBooleanChecker ());
+static ns3::GlobalValue g_spreadUdpLoad (
+    "spreadUdpLoad",
+    "optimization to try to spread a saturating UDP load across multiple UE and cells",
+    ns3::BooleanValue (false), ns3::MakeBooleanChecker ());
 
-static ns3::GlobalValue g_wifiMacQueueMaxDelay ("wifiQueueMaxDelay",
-                                         "change from default 500 ms to change the maximum queue dwell time for Wifi packets",
-                                         ns3::UintegerValue (500),
-                                         ns3::MakeUintegerChecker<uint32_t> ());
+static ns3::GlobalValue g_wifiMacQueueMaxDelay (
+    "wifiQueueMaxDelay",
+    "change from default 500 ms to change the maximum queue dwell time for Wifi packets",
+    ns3::UintegerValue (500), ns3::MakeUintegerChecker<uint32_t> ());
 
-static ns3::GlobalValue g_wifiMacQueueMaxSize ("wifiQueueMaxSize",
-                                         "change from default 400 packets to change the queue size for Wifi packets",
-                                         ns3::QueueSizeValue (QueueSize ("400p")),
-                                         ns3::MakeQueueSizeChecker ());
+// Rashed: Nov 23
+// wifiQueueMaxSize should be 2000
+static ns3::GlobalValue g_wifiMacQueueMaxSize (
+    "wifiQueueMaxSize", "change from default 400 packets to change the queue size for Wifi packets",
+    ns3::QueueSizeValue (QueueSize ("2000p")), ns3::MakeQueueSizeChecker ());
 
-static ns3::GlobalValue g_mibPeriod ("mibPeriod",
-                                     "periodicity to be set for MIB ctrl messages",
+static ns3::GlobalValue g_mibPeriod ("mibPeriod", "periodicity to be set for MIB ctrl messages",
                                      ns3::UintegerValue (10),
-                                     ns3::MakeUintegerChecker<uint32_t> (10,160));
+                                     ns3::MakeUintegerChecker<uint32_t> (10, 160));
 
-static ns3::GlobalValue g_sibPeriod ("sibPeriod",
-                                     "periodicity to be set for SIB1 ctrl messages",
+static ns3::GlobalValue g_sibPeriod ("sibPeriod", "periodicity to be set for SIB1 ctrl messages",
                                      ns3::UintegerValue (20),
-                                     ns3::MakeUintegerChecker<uint32_t> (20,160));
+                                     ns3::MakeUintegerChecker<uint32_t> (20, 160));
 
-static ns3::GlobalValue g_drsPeriod ("drsPeriod",
-                                     "periodicity to be set for DRS ctrl messages",
+static ns3::GlobalValue g_drsPeriod ("drsPeriod", "periodicity to be set for DRS ctrl messages",
                                      ns3::UintegerValue (80),
-                                     ns3::MakeUintegerChecker<uint32_t> (40,160));
+                                     ns3::MakeUintegerChecker<uint32_t> (40, 160));
 
 static ns3::GlobalValue g_drsEnabled ("drsEnabled",
                                       "if true, drs ctrl messages will be generated"
                                       "if false, drs ctrl messages will not be generated",
-                                      ns3::BooleanValue (true),
-                                      ns3::MakeBooleanChecker ());
+                                      ns3::BooleanValue (true), ns3::MakeBooleanChecker ());
 
-static ns3::GlobalValue g_disableMibAndSibStartupTime ("disableMibAndSibStartupTime",
-                                                       "the time at which to disable mib and sib control messages (seconds)",
-                                                       ns3::DoubleValue (2),
-                                                       ns3::MakeDoubleChecker<double> ());
-static ns3::GlobalValue g_dropPackets ("dropPackets",
-                                         "applicable to impl2; if true, Phy will drop packets upon failure to obtain channel access",
-                                         ns3::BooleanValue (false),
-                                         ns3::MakeBooleanChecker ());
+static ns3::GlobalValue g_disableMibAndSibStartupTime (
+    "disableMibAndSibStartupTime",
+    "the time at which to disable mib and sib control messages (seconds)", ns3::DoubleValue (2),
+    ns3::MakeDoubleChecker<double> ());
+static ns3::GlobalValue g_dropPackets (
+    "dropPackets",
+    "applicable to impl2; if true, Phy will drop packets upon failure to obtain channel access",
+    ns3::BooleanValue (false), ns3::MakeBooleanChecker ());
 
-static ns3::GlobalValue g_lteChannelAccessImpl ("lteChannelAccessImpl",
-                                         "if true, (impl1) it will be used lte channel access implemenation that stops scheduler when no channel access, thus has 2ms delay"
-                                         "if false, (impl2) it will be used lte channel acces implementation that does not stop scheduler, always schedules, transmits only when "
-                                         "there is channel access, can be used in combination with drop packet attribute",
-                                         ns3::BooleanValue (false),
-                                         ns3::MakeBooleanChecker ());
+static ns3::GlobalValue g_lteChannelAccessImpl (
+    "lteChannelAccessImpl",
+    "if true, (impl1) it will be used lte channel access implemenation that stops scheduler when "
+    "no channel access, thus has 2ms delay"
+    "if false, (impl2) it will be used lte channel acces implementation that does not stop "
+    "scheduler, always schedules, transmits only when "
+    "there is channel access, can be used in combination with drop packet attribute",
+    ns3::BooleanValue (false), ns3::MakeBooleanChecker ());
 
-static ns3::GlobalValue g_tcpRlcMode ("tcpRlcMode",
-                                        "RLC_AM, RLC_UM",
-                                        ns3::EnumValue (LteEnbRrc::RLC_AM_ALWAYS),
-                                        ns3::MakeEnumChecker (LteEnbRrc::RLC_AM_ALWAYS, "RlcAm",
-                                                              LteEnbRrc::RLC_UM_ALWAYS, "RlcUm"));
+static ns3::GlobalValue g_tcpRlcMode ("tcpRlcMode", "RLC_AM, RLC_UM",
+                                      ns3::EnumValue (LteEnbRrc::RLC_AM_ALWAYS),
+                                      ns3::MakeEnumChecker (LteEnbRrc::RLC_AM_ALWAYS, "RlcAm",
+                                                            LteEnbRrc::RLC_UM_ALWAYS, "RlcUm"));
 
-static ns3::GlobalValue g_rlcReportBufferStatusTimer ("rlcAmRbsTimer",
-                                                      "Set value of ReportBufferStatusTimer attribute of RlcAm.",
-                                                      ns3::UintegerValue (20),
-                                                      ns3::MakeUintegerChecker<uint32_t> ());
+static ns3::GlobalValue
+    g_rlcReportBufferStatusTimer ("rlcAmRbsTimer",
+                                  "Set value of ReportBufferStatusTimer attribute of RlcAm.",
+                                  ns3::UintegerValue (20), ns3::MakeUintegerChecker<uint32_t> ());
 
+/*Rashed Nov 24, 2021
+*
+*/
+static ns3::GlobalValue
+    g_isSelfishBackoffScenario ("isSelfishBackoffScenario",
+                                "If this is true, then the attack is happenning",
+                                ns3::BooleanValue (false), ns3::MakeBooleanChecker ()
+
+    );
+
+static ns3::GlobalValue
+    g_isSelfishBackoffMaliciousAPID ("selfishBackoffMaliciousAPID",
+                                     "If this is true, then the attack is happenning",
+                                     ns3::UintegerValue (0), ns3::MakeUintegerChecker<uint32_t> ()
+
+    );
+
+Time interval_simulation = Seconds (1);
 // Parse context strings of the form "/NodeList/3/DeviceList/1/Mac/Assoc"
 // to extract the NodeId
 uint32_t
 ContextToNodeId (std::string context)
 {
-  std::string sub = context.substr (10);  // skip "/NodeList/"
+  std::string sub = context.substr (10); // skip "/NodeList/"
   uint32_t pos = sub.find ("/Device");
   NS_LOG_DEBUG ("Found NodeId " << atoi (sub.substr (0, pos).c_str ()));
-  return atoi (sub.substr (0,pos).c_str ());
+  return atoi (sub.substr (0, pos).c_str ());
 }
 
 // Generate a 'fake' context id that can be parsed by ContextToNodeId ()
@@ -290,7 +298,7 @@ ContextToDeviceId (std::string context)
   std::string sub = context.substr (pos + 12); // skip "/DeviceList/"
   pos = sub.find ("/Mac");
   NS_LOG_DEBUG ("Found DeviceId " << atoi (sub.substr (0, pos).c_str ()));
-  return atoi (sub.substr (0,pos).c_str ());
+  return atoi (sub.substr (0, pos).c_str ());
 }
 
 std::string
@@ -311,73 +319,73 @@ CellConfigToString (enum Config_e config)
 }
 
 std::string
-CtrlSignalToString (std::list<Ptr<LteControlMessage> > ctrlMsg)
+CtrlSignalToString (std::list<Ptr<LteControlMessage>> ctrlMsg)
 {
-  std::string msgString="Unknown_CTRL";
-  std::string tempString="Unknown_CTRL";;
-  std::list<Ptr<LteControlMessage> >::iterator it;
+  std::string msgString = "Unknown_CTRL";
+  std::string tempString = "Unknown_CTRL";
+  ;
+  std::list<Ptr<LteControlMessage>>::iterator it;
   it = ctrlMsg.begin ();
   bool firstTime = true;
   while (it != ctrlMsg.end ())
     {
       Ptr<LteControlMessage> msg = (*it);
-      switch (msg->GetMessageType())
-      {
+      switch (msg->GetMessageType ())
+        {
         case LteControlMessage::MIB:
-          tempString="MIB";
+          tempString = "MIB";
           break;
 
         case LteControlMessage::SIB1:
-          tempString="SIB1";
+          tempString = "SIB1";
           break;
 
         case LteControlMessage::DRS:
-          tempString="DRS";
+          tempString = "DRS";
           break;
 
         case LteControlMessage::DL_DCI:
-          tempString="DL_DCI";
+          tempString = "DL_DCI";
           break;
 
         case LteControlMessage::UL_DCI:
-          tempString="UL_DCI";
+          tempString = "UL_DCI";
           break;
 
         case LteControlMessage::BSR:
-          tempString="BSR";
+          tempString = "BSR";
           break;
 
         case LteControlMessage::DL_HARQ:
-          tempString="DL_HARQ";
+          tempString = "DL_HARQ";
           break;
 
         case LteControlMessage::RACH_PREAMBLE:
-          tempString="RACH_PREAMBLE";
+          tempString = "RACH_PREAMBLE";
           break;
 
         case LteControlMessage::RAR:
-          tempString="RAR";
+          tempString = "RAR";
           break;
 
         default:
-          tempString="Unknown_CTRL";
+          tempString = "Unknown_CTRL";
           break;
-      }
+        }
 
-      if(firstTime)
+      if (firstTime)
         {
-          msgString=tempString;
+          msgString = tempString;
           firstTime = false;
         }
       else
         {
-          msgString=msgString+":"+tempString;
+          msgString = msgString + ":" + tempString;
         }
       ++it;
     }
   return msgString;
 }
-
 
 Ptr<Node>
 MacAddressToNode (Mac48Address address)
@@ -477,7 +485,6 @@ GetRemoteDevice (Ptr<Node> ap, Ptr<PointToPointNetDevice> p2p)
   return 0;
 }
 
-
 struct AssociationEvent
 {
   Time m_time;
@@ -570,7 +577,6 @@ struct CtrlSignalLog
   std::string m_ctrlType;
 };
 
-
 std::vector<AssociationEvent> g_associations;
 std::vector<SignalArrival> g_arrivals;
 std::vector<TxopLog> g_txopLogs;
@@ -587,7 +593,6 @@ std::vector<CtrlSignalLog> g_ctrlSignalLog;
 
 double g_txopDurationCounter = 0;
 double g_arrivalsDurationCounter = 0;
-
 
 void
 DeassociationLogging (std::string context, Mac48Address address)
@@ -610,7 +615,7 @@ DeassociationLogging (std::string context, Mac48Address address)
   a.m_nodeId = myNodeId;
   a.m_address = address;
   a.m_type = "deassociate";
-  a.m_apNodeId=ap->GetId();
+  a.m_apNodeId = ap->GetId ();
   g_associations.push_back (a);
 }
 
@@ -684,7 +689,7 @@ void
 SignalCb (std::string context, bool wifi, uint32_t senderNodeId, double rxPowerDbm, Time rxDuration)
 {
   SignalArrival arr;
-  arr.m_time = Simulator::Now();
+  arr.m_time = Simulator::Now ();
   arr.m_duration = rxDuration;
   arr.m_nodeId = ContextToNodeId (context);
   arr.m_senderNodeId = senderNodeId;
@@ -700,34 +705,35 @@ SignalCb (std::string context, bool wifi, uint32_t senderNodeId, double rxPowerD
       GlobalValue::GetValueByName ("logTxopNodeId", uintegerValue);
       if (uintegerValue.Get () == arr.m_senderNodeId)
         {
-          g_arrivalsDurationCounter += rxDuration.GetSeconds();
+          g_arrivalsDurationCounter += rxDuration.GetSeconds ();
         }
     }
 
-  NS_LOG_DEBUG (context << " " << wifi << " " << senderNodeId << " " << rxPowerDbm << " " << rxDuration.GetSeconds ()/1000.0);
+  NS_LOG_DEBUG (context << " " << wifi << " " << senderNodeId << " " << rxPowerDbm << " "
+                        << rxDuration.GetSeconds () / 1000.0);
 }
 
 void
-CtrlSignalCb (std::string context, std::list<Ptr<LteControlMessage> > ctrlMsg)
+CtrlSignalCb (std::string context, std::list<Ptr<LteControlMessage>> ctrlMsg)
 {
   if (ctrlMsg.size () > 0)
-  {
-    CtrlSignalLog ctrlsig;
-    ctrlsig.m_time=Simulator::Now();
-    ctrlsig.m_nodeId=ContextToNodeId (context);
-    ctrlsig.m_ctrlType=CtrlSignalToString(ctrlMsg);
-    g_ctrlSignalLog.push_back (ctrlsig);
+    {
+      CtrlSignalLog ctrlsig;
+      ctrlsig.m_time = Simulator::Now ();
+      ctrlsig.m_nodeId = ContextToNodeId (context);
+      ctrlsig.m_ctrlType = CtrlSignalToString (ctrlMsg);
+      g_ctrlSignalLog.push_back (ctrlsig);
 
-    NS_LOG_DEBUG (context << " " << ctrlsig.m_nodeId << " " <<ctrlsig.m_ctrlType<<" " << ctrlsig.m_time.GetSeconds ()/1000.0);
-  }
-
+      NS_LOG_DEBUG (context << " " << ctrlsig.m_nodeId << " " << ctrlsig.m_ctrlType << " "
+                            << ctrlsig.m_time.GetSeconds () / 1000.0);
+    }
 }
 
 void
 HandleTxopReceived (std::string context, Time startTime, Time duration)
 {
   TxopLog txopLog;
-  txopLog.m_time = Simulator::Now();
+  txopLog.m_time = Simulator::Now ();
   txopLog.m_duration = duration;
   txopLog.m_nodeId = ContextToNodeId (context);
   g_txopLogs.push_back (txopLog);
@@ -736,9 +742,10 @@ HandleTxopReceived (std::string context, Time startTime, Time duration)
   GlobalValue::GetValueByName ("logTxopNodeId", uintegerValue);
   if ((uintegerValue.Get () == UINT32_MAX) || (uintegerValue.Get () == txopLog.m_nodeId))
     {
-      g_txopDurationCounter += duration.GetSeconds();
+      g_txopDurationCounter += duration.GetSeconds ();
     }
-  NS_LOG_DEBUG (context <<" " << txopLog.m_nodeId << " " << txopLog.m_time << " " << txopLog.m_duration.GetSeconds());
+  NS_LOG_DEBUG (context << " " << txopLog.m_nodeId << " " << txopLog.m_time << " "
+                        << txopLog.m_duration.GetSeconds ());
 }
 
 void
@@ -757,47 +764,47 @@ void
 LteDataTxCallback (std::string context, uint32_t bytes)
 {
   DataTx dataTxLog;
-  dataTxLog.m_time = Simulator::Now();
+  dataTxLog.m_time = Simulator::Now ();
   dataTxLog.m_nodeId = ContextToNodeId (context);
   dataTxLog.m_size = bytes;
-  g_dataTxLogs.push_back(dataTxLog);
+  g_dataTxLogs.push_back (dataTxLog);
 }
-
 
 void
 HarqFeedbackReceived (std::string context, std::vector<DlInfoListElement_s> m_dlInfoListReceived)
 {
   HarqFeedbackLog harq;
-  harq.m_time = Simulator::Now();
-  harq.m_nodeId = ContextToNodeId(context);
+  harq.m_time = Simulator::Now ();
+  harq.m_nodeId = ContextToNodeId (context);
 
   uint32_t nackCounter = 0;
   std::vector<uint8_t> harqFeedback;
-   for (uint16_t i = 0; i < m_dlInfoListReceived.size(); i++)
-     {
-       for (uint8_t layer = 0; layer < m_dlInfoListReceived.at(i).m_harqStatus.size (); layer++)
-         {
-           if (m_dlInfoListReceived.at(i).m_harqStatus.at(layer) == DlInfoListElement_s::ACK)
-             {
-               harqFeedback.push_back(0);
-               harq.m_ueId.push_back(m_dlInfoListReceived.at(i).m_rnti);
-             }
-           else if (m_dlInfoListReceived.at(i).m_harqStatus.at(layer) == DlInfoListElement_s::NACK)
-             {
-               harqFeedback.push_back(1);
-               nackCounter++;
-               harq.m_ueId.push_back(m_dlInfoListReceived.at(i).m_rnti);
-             }
-         }
-     }
+  for (uint16_t i = 0; i < m_dlInfoListReceived.size (); i++)
+    {
+      for (uint8_t layer = 0; layer < m_dlInfoListReceived.at (i).m_harqStatus.size (); layer++)
+        {
+          if (m_dlInfoListReceived.at (i).m_harqStatus.at (layer) == DlInfoListElement_s::ACK)
+            {
+              harqFeedback.push_back (0);
+              harq.m_ueId.push_back (m_dlInfoListReceived.at (i).m_rnti);
+            }
+          else if (m_dlInfoListReceived.at (i).m_harqStatus.at (layer) == DlInfoListElement_s::NACK)
+            {
+              harqFeedback.push_back (1);
+              nackCounter++;
+              harq.m_ueId.push_back (m_dlInfoListReceived.at (i).m_rnti);
+            }
+        }
+    }
 
-  if (harqFeedback.size())
-    harq.m_ackCount = harqFeedback.size() - nackCounter;
+  if (harqFeedback.size ())
+    harq.m_ackCount = harqFeedback.size () - nackCounter;
   else
     harq.m_ackCount = 0;
   harq.m_nackCount = nackCounter;
-  g_harqFeedbacks.push_back(harq);
-  NS_LOG_DEBUG (context << " " << harq.m_nodeId << " " << nackCounter << " " << harqFeedback.size() - nackCounter);
+  g_harqFeedbacks.push_back (harq);
+  NS_LOG_DEBUG (context << " " << harq.m_nodeId << " " << nackCounter << " "
+                        << harqFeedback.size () - nackCounter);
 }
 
 void
@@ -807,147 +814,177 @@ ReservationSignalTraceReceived (std::string context, Time startTime, Time durati
   resSigLog.m_time = startTime;
   resSigLog.m_nodeId = ContextToNodeId (context);
   resSigLog.m_duration = duration;
-  g_reservationSingals.push_back(resSigLog);
+  g_reservationSingals.push_back (resSigLog);
 }
 
 void
 CwChangeConnect (Ptr<NetDevice> lteEnbNetDevice)
 {
-  Ptr<LbtAccessManager> lbtAccessManager = DynamicCast<LbtAccessManager>(lteEnbNetDevice->GetObject<LteEnbNetDevice>()->GetPhy()->GetChannelAccessManager());
-  NS_ASSERT_MSG(lbtAccessManager!=0, "LbtAccessManager does not exist");
+  Ptr<LbtAccessManager> lbtAccessManager = DynamicCast<LbtAccessManager> (
+      lteEnbNetDevice->GetObject<LteEnbNetDevice> ()->GetPhy ()->GetChannelAccessManager ());
+  NS_ASSERT_MSG (lbtAccessManager != 0, "LbtAccessManager does not exist");
   std::string context = NodeIdToContext (lteEnbNetDevice->GetNode ()->GetId ());
-  bool success = lbtAccessManager->TraceConnect("Cw", context, MakeCallback(&CwChangeCb));
+  bool success = lbtAccessManager->TraceConnect ("Cw", context, MakeCallback (&CwChangeCb));
   NS_ASSERT (success);
 }
 
 void
 CwChangeDisconnect (Ptr<NetDevice> lteEnbNetDevice)
 {
-  Ptr<LbtAccessManager> lbtAccessManager = DynamicCast<LbtAccessManager>(lteEnbNetDevice->GetObject<LteEnbNetDevice>()->GetPhy()->GetChannelAccessManager());
-  NS_ASSERT_MSG(lbtAccessManager!=0, "LbtAccessManager does not exist");
+  Ptr<LbtAccessManager> lbtAccessManager = DynamicCast<LbtAccessManager> (
+      lteEnbNetDevice->GetObject<LteEnbNetDevice> ()->GetPhy ()->GetChannelAccessManager ());
+  NS_ASSERT_MSG (lbtAccessManager != 0, "LbtAccessManager does not exist");
   std::string context = NodeIdToContext (lteEnbNetDevice->GetNode ()->GetId ());
-  bool success = lbtAccessManager->TraceDisconnect("Cw", context, MakeCallback(&CwChangeCb));
+  bool success = lbtAccessManager->TraceDisconnect ("Cw", context, MakeCallback (&CwChangeCb));
   NS_ASSERT (success);
 }
 
 void
 BackoffChangeConnect (Ptr<NetDevice> lteEnbNetDevice)
 {
-  Ptr<LbtAccessManager> lbtAccessManager = DynamicCast<LbtAccessManager>(lteEnbNetDevice->GetObject<LteEnbNetDevice>()->GetPhy()->GetChannelAccessManager());
-  NS_ASSERT_MSG(lbtAccessManager!=0, "LbtAccessManager does not exist");
+  Ptr<LbtAccessManager> lbtAccessManager = DynamicCast<LbtAccessManager> (
+      lteEnbNetDevice->GetObject<LteEnbNetDevice> ()->GetPhy ()->GetChannelAccessManager ());
+  NS_ASSERT_MSG (lbtAccessManager != 0, "LbtAccessManager does not exist");
   std::string context = NodeIdToContext (lteEnbNetDevice->GetNode ()->GetId ());
-  bool success = lbtAccessManager->TraceConnect("Backoff", context, MakeCallback(&BackoffChangeCb));
+  bool success =
+      lbtAccessManager->TraceConnect ("Backoff", context, MakeCallback (&BackoffChangeCb));
   NS_ASSERT (success);
 }
 
 void
 BackoffChangeDisconnect (Ptr<NetDevice> lteEnbNetDevice)
 {
-  Ptr<LbtAccessManager> lbtAccessManager = DynamicCast<LbtAccessManager>(lteEnbNetDevice->GetObject<LteEnbNetDevice>()->GetPhy()->GetChannelAccessManager());
-  NS_ASSERT_MSG(lbtAccessManager!=0, "LbtAccessManager does not exist");
+  Ptr<LbtAccessManager> lbtAccessManager = DynamicCast<LbtAccessManager> (
+      lteEnbNetDevice->GetObject<LteEnbNetDevice> ()->GetPhy ()->GetChannelAccessManager ());
+  NS_ASSERT_MSG (lbtAccessManager != 0, "LbtAccessManager does not exist");
   std::string context = NodeIdToContext (lteEnbNetDevice->GetNode ()->GetId ());
-  bool success = lbtAccessManager->TraceDisconnect("Backoff", context, MakeCallback(&BackoffChangeCb));
+  bool success =
+      lbtAccessManager->TraceDisconnect ("Backoff", context, MakeCallback (&BackoffChangeCb));
   NS_ASSERT (success);
 }
 
 void
 HarqFeedbackConnect (Ptr<NetDevice> lteEnbNetDevice)
 {
-  Ptr<LteEnbMac> lteEnbMac = lteEnbNetDevice->GetObject<LteEnbNetDevice>()->GetMac();
-  NS_ASSERT_MSG(lteEnbMac!=0, "lteEnbMac does not exist");
+  Ptr<LteEnbMac> lteEnbMac = lteEnbNetDevice->GetObject<LteEnbNetDevice> ()->GetMac ();
+  NS_ASSERT_MSG (lteEnbMac != 0, "lteEnbMac does not exist");
   std::string context = NodeIdToContext (lteEnbNetDevice->GetNode ()->GetId ());
-  bool success = lteEnbMac->TraceConnect("DlHarqFeedback", context, MakeCallback(&HarqFeedbackReceived));
+  bool success =
+      lteEnbMac->TraceConnect ("DlHarqFeedback", context, MakeCallback (&HarqFeedbackReceived));
   NS_ASSERT (success);
 }
 
 void
 HarqFeedbackDisconnect (Ptr<NetDevice> lteEnbNetDevice)
 {
-  Ptr<LteEnbMac> lteEnbMac = lteEnbNetDevice->GetObject<LteEnbNetDevice>()->GetMac();
-  NS_ASSERT_MSG(lteEnbMac!=0, "lteEnbMac does not exist");
+  Ptr<LteEnbMac> lteEnbMac = lteEnbNetDevice->GetObject<LteEnbNetDevice> ()->GetMac ();
+  NS_ASSERT_MSG (lteEnbMac != 0, "lteEnbMac does not exist");
   std::string context = NodeIdToContext (lteEnbNetDevice->GetNode ()->GetId ());
-  bool success = lteEnbMac->TraceDisconnect("DlHarqFeedback", context, MakeCallback(&HarqFeedbackReceived));
+  bool success =
+      lteEnbMac->TraceDisconnect ("DlHarqFeedback", context, MakeCallback (&HarqFeedbackReceived));
   NS_ASSERT (success);
 }
 
 void
 ReservationSignalTraceConnect (Ptr<NetDevice> lteEnbNetDevice)
 {
-  Ptr<LteEnbPhy> lteEnbPhy = lteEnbNetDevice->GetObject<LteEnbNetDevice>()->GetPhy();
-  NS_ASSERT_MSG(lteEnbPhy!=0, "lteEnbPhy does not exist");
+  Ptr<LteEnbPhy> lteEnbPhy = lteEnbNetDevice->GetObject<LteEnbNetDevice> ()->GetPhy ();
+  NS_ASSERT_MSG (lteEnbPhy != 0, "lteEnbPhy does not exist");
   std::string context = NodeIdToContext (lteEnbNetDevice->GetNode ()->GetId ());
-  bool success = lteEnbPhy->TraceConnect("ReservationSignal", context, MakeCallback(&ReservationSignalTraceReceived));
+  bool success = lteEnbPhy->TraceConnect ("ReservationSignal", context,
+                                          MakeCallback (&ReservationSignalTraceReceived));
   NS_ASSERT (success);
 }
 
 void
 ReservationSignalTraceDisconnect (Ptr<NetDevice> lteEnbNetDevice)
 {
-  Ptr<LteEnbPhy> lteEnbPhy = lteEnbNetDevice->GetObject<LteEnbNetDevice>()->GetPhy();
-  NS_ASSERT_MSG(lteEnbPhy!=0, "lteEnbPhy does not exist");
+  Ptr<LteEnbPhy> lteEnbPhy = lteEnbNetDevice->GetObject<LteEnbNetDevice> ()->GetPhy ();
+  NS_ASSERT_MSG (lteEnbPhy != 0, "lteEnbPhy does not exist");
   std::string context = NodeIdToContext (lteEnbNetDevice->GetNode ()->GetId ());
-  bool success = lteEnbPhy->TraceDisconnect("ReservationSignal", context, MakeCallback(&ReservationSignalTraceReceived));
+  bool success = lteEnbPhy->TraceDisconnect ("ReservationSignal", context,
+                                             MakeCallback (&ReservationSignalTraceReceived));
   NS_ASSERT (success);
 }
 
 void
 ScheduleWifiBackoffLogConnect (void)
 {
-  Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/Txop/BackoffTrace", MakeCallback (&BackoffChangeCb));
+  Config::Connect (
+      "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/Txop/BackoffTrace",
+      MakeCallback (&BackoffChangeCb));
 }
 
 void
 ScheduleWifiBackoffLogDisconnect (void)
 {
-  Config::Disconnect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/Txop/BackoffTrace", MakeCallback (&BackoffChangeCb));
+  Config::Disconnect (
+      "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/Txop/BackoffTrace",
+      MakeCallback (&BackoffChangeCb));
 }
 
 void
 ScheduleCwChangesLogConnect (void)
 {
-  Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/Txop/CwTrace", MakeCallback (&CwChangeCb));
+  Config::Connect (
+      "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/Txop/CwTrace",
+      MakeCallback (&CwChangeCb));
 }
 
 void
 ScheduleCwChangesLogDisconnect (void)
 {
-  Config::Disconnect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/Txop/CwTrace", MakeCallback (&CwChangeCb));
+  Config::Disconnect (
+      "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/Txop/CwTrace",
+      MakeCallback (&CwChangeCb));
 }
 
 void
 ScheduleWifiFailRetriesLogConnect (void)
 {
-  Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/RemoteStationManager/MacTxFinalDataFailed", MakeCallback (&WifiFailRetriesCb));
+  Config::Connect (
+      "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/RemoteStationManager/MacTxFinalDataFailed",
+      MakeCallback (&WifiFailRetriesCb));
 }
 
 void
 ScheduleWifiFailRetriesLogDisconnect (void)
 {
-  Config::Disconnect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/RemoteStationManager/MacTxFinalDataFailed", MakeCallback (&WifiFailRetriesCb));
+  Config::Disconnect (
+      "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/RemoteStationManager/MacTxFinalDataFailed",
+      MakeCallback (&WifiFailRetriesCb));
 }
 
 void
 ScheduleWifiRetriesLogConnect (void)
 {
-  Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/RemoteStationManager/MacTxDataFailed", MakeCallback (&WifiRetriesCb));
+  Config::Connect (
+      "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/RemoteStationManager/MacTxDataFailed",
+      MakeCallback (&WifiRetriesCb));
 }
 
 void
 ScheduleWifiRetriesLogDisconnect (void)
 {
-  Config::Disconnect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/RemoteStationManager/MacTxDataFailed", MakeCallback (&WifiRetriesCb));
+  Config::Disconnect (
+      "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/RemoteStationManager/MacTxDataFailed",
+      MakeCallback (&WifiRetriesCb));
 }
 
 void
 SchedulePhyLogConnect (void)
 {
-  Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/$ns3::SpectrumWifiPhy/SignalArrival", MakeCallback (&SignalCb));
+  Config::Connect (
+      "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/$ns3::SpectrumWifiPhy/SignalArrival",
+      MakeCallback (&SignalCb));
 }
 
 void
 SchedulePhyLogDisconnect (void)
 {
-  Config::Disconnect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/$ns3::SpectrumWifiPhy/SignalArrival", MakeCallback (&SignalCb));
+  Config::Disconnect (
+      "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/$ns3::SpectrumWifiPhy/SignalArrival",
+      MakeCallback (&SignalCb));
 }
 
 void
@@ -955,14 +992,24 @@ ScheduleTxopLogConnect (Config_e cellConfigA, Config_e cellConfigB)
 {
   if (cellConfigA == WIFI || cellConfigB == WIFI)
     {
-      Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/BE_Txop/TxopTrace", MakeCallback (&WifiTxopReceived));
-      Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/BK_Txop/TxopTrace", MakeCallback (&WifiTxopReceived));
-      Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/VO_Txop/TxopTrace", MakeCallback (&WifiTxopReceived));
-      Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/VI_Txop/TxopTrace", MakeCallback (&WifiTxopReceived));
+      Config::Connect (
+          "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/BE_Txop/TxopTrace",
+          MakeCallback (&WifiTxopReceived));
+      Config::Connect (
+          "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/BK_Txop/TxopTrace",
+          MakeCallback (&WifiTxopReceived));
+      Config::Connect (
+          "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/VO_Txop/TxopTrace",
+          MakeCallback (&WifiTxopReceived));
+      Config::Connect (
+          "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/VI_Txop/TxopTrace",
+          MakeCallback (&WifiTxopReceived));
     }
   else
     {
-      Config::Connect ("/NodeList/*/DeviceList/*/$ns3::LteNetDevice/$ns3::LteEnbNetDevice/LteEnbPhy/Txop", MakeCallback (&LteTxopReceived));
+      Config::Connect (
+          "/NodeList/*/DeviceList/*/$ns3::LteNetDevice/$ns3::LteEnbNetDevice/LteEnbPhy/Txop",
+          MakeCallback (&LteTxopReceived));
     }
 }
 
@@ -971,51 +1018,67 @@ ScheduleTxopLogDisconnect (Config_e cellConfigA, Config_e cellConfigB)
 {
   if (cellConfigA == WIFI || cellConfigB == WIFI)
     {
-      Config::Disconnect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/BE_Txop/TxopTrace", MakeCallback (&WifiTxopReceived));
-      Config::Disconnect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/BK_Txop/TxopTrace", MakeCallback (&WifiTxopReceived));
-      Config::Disconnect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/VO_Txop/TxopTrace", MakeCallback (&WifiTxopReceived));
-      Config::Disconnect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/VI_Txop/TxopTrace", MakeCallback (&WifiTxopReceived));
+      Config::Disconnect (
+          "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/BE_Txop/TxopTrace",
+          MakeCallback (&WifiTxopReceived));
+      Config::Disconnect (
+          "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/BK_Txop/TxopTrace",
+          MakeCallback (&WifiTxopReceived));
+      Config::Disconnect (
+          "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/VO_Txop/TxopTrace",
+          MakeCallback (&WifiTxopReceived));
+      Config::Disconnect (
+          "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::RegularWifiMac/VI_Txop/TxopTrace",
+          MakeCallback (&WifiTxopReceived));
     }
   else
     {
-      Config::Disconnect ("/NodeList/*/DeviceList/*/$ns3::LteNetDevice/$ns3::LteEnbNetDevice/LteEnbPhy/Txop", MakeCallback (&LteTxopReceived));
+      Config::Disconnect (
+          "/NodeList/*/DeviceList/*/$ns3::LteNetDevice/$ns3::LteEnbNetDevice/LteEnbPhy/Txop",
+          MakeCallback (&LteTxopReceived));
     }
 }
 
 void
 ScheduleDataTxConnect (void)
 {
-  Config::Connect ("/NodeList/*/DeviceList/*/LteEnbPhy/DataSent", MakeCallback (&LteDataTxCallback));
+  Config::Connect ("/NodeList/*/DeviceList/*/LteEnbPhy/DataSent",
+                   MakeCallback (&LteDataTxCallback));
 }
 
 void
 ScheduleDataTxDisconnect (void)
 {
-  Config::Disconnect ("/NodeList/*/DeviceList/*/LteEnbPhy/DataSent", MakeCallback (&LteDataTxCallback));
+  Config::Disconnect ("/NodeList/*/DeviceList/*/LteEnbPhy/DataSent",
+                      MakeCallback (&LteDataTxCallback));
 }
 
 void
 ScheduleBeaconLogConnect (void)
 {
-  Config::Connect ("/NodeList/*/DeviceList/*/Mac/$ns3::StaWifiMac/BeaconArrival", MakeCallback (&BeaconArrivalCb));
+  Config::Connect ("/NodeList/*/DeviceList/*/Mac/$ns3::StaWifiMac/BeaconArrival",
+                   MakeCallback (&BeaconArrivalCb));
 }
 
 void
 ScheduleBeaconLogDisconnect (void)
 {
-  Config::Disconnect ("/NodeList/*/DeviceList/*/Mac/$ns3::StaWifiMac/BeaconArrival", MakeCallback (&BeaconArrivalCb));
+  Config::Disconnect ("/NodeList/*/DeviceList/*/Mac/$ns3::StaWifiMac/BeaconArrival",
+                      MakeCallback (&BeaconArrivalCb));
 }
 
 void
 ScheduleCtrlSignalLogConnect (void)
 {
-  Config::Connect ("/NodeList/*/DeviceList/*/LteEnbPhy/CtrlMsgTransmission", MakeCallback (&CtrlSignalCb));
+  Config::Connect ("/NodeList/*/DeviceList/*/LteEnbPhy/CtrlMsgTransmission",
+                   MakeCallback (&CtrlSignalCb));
 }
 
 void
 ScheduleCtrlSignalLogDisconnect (void)
 {
-  Config::Disconnect ("/NodeList/*/DeviceList/*/LteEnbPhy/CtrlMsgTransmission", MakeCallback (&CtrlSignalCb));
+  Config::Disconnect ("/NodeList/*/DeviceList/*/LteEnbPhy/CtrlMsgTransmission",
+                      MakeCallback (&CtrlSignalCb));
 }
 
 void
@@ -1046,7 +1109,8 @@ ConfigureRouteForStation (std::string context, Mac48Address address)
   Ipv4InterfaceAddress apAddr = ip->GetAddress (iface, 0);
   NS_LOG_DEBUG ("ConfigureRouteForStation ap addr: " << apAddr.GetLocal ());
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
-  Ptr<Ipv4StaticRouting> myStaticRouting = ipv4RoutingHelper.GetStaticRouting (myNode->GetObject<Ipv4> ());
+  Ptr<Ipv4StaticRouting> myStaticRouting =
+      ipv4RoutingHelper.GetStaticRouting (myNode->GetObject<Ipv4> ());
   myStaticRouting->SetDefaultRoute (apAddr.GetLocal (), myIface);
   NS_LOG_DEBUG ("Setting STA default to: " << apAddr.GetLocal () << " " << myIface);
 
@@ -1057,9 +1121,11 @@ ConfigureRouteForStation (std::string context, Mac48Address address)
   Ptr<CsmaNetDevice> remote = GetClientDevice (csma);
   ip = remote->GetNode ()->GetObject<Ipv4> ();
   iface = ip->GetInterfaceForDevice (remote);
-  Ptr<Ipv4StaticRouting> clientStaticRouting = ipv4RoutingHelper.GetStaticRouting (remote->GetNode ()->GetObject<Ipv4> ());
+  Ptr<Ipv4StaticRouting> clientStaticRouting =
+      ipv4RoutingHelper.GetStaticRouting (remote->GetNode ()->GetObject<Ipv4> ());
   clientStaticRouting->AddHostRouteTo (myAddr.GetLocal (), apAddr.GetLocal (), iface);
-  NS_LOG_DEBUG ("Setting client host route to " << myAddr.GetLocal () << " to nextHop " << apAddr << " " << iface);
+  NS_LOG_DEBUG ("Setting client host route to " << myAddr.GetLocal () << " to nextHop " << apAddr
+                                                << " " << iface);
 
   // Log the association event
   AssociationEvent a;
@@ -1067,18 +1133,20 @@ ConfigureRouteForStation (std::string context, Mac48Address address)
   a.m_nodeId = myNodeId;
   a.m_address = address;
   a.m_type = "associate";
-  a.m_apNodeId=ap->GetId();
+  a.m_apNodeId = ap->GetId ();
   g_associations.push_back (a);
 }
 
 void
-PrintFlowMonitorStats (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmonHelper, double duration)
+PrintFlowMonitorStats (Ptr<FlowMonitor> monitor, FlowMonitorHelper &flowmonHelper, double duration)
 {
   // Print per-flow statistics
   monitor->CheckForLostPackets ();
-  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmonHelper.GetClassifier ());
+  Ptr<Ipv4FlowClassifier> classifier =
+      DynamicCast<Ipv4FlowClassifier> (flowmonHelper.GetClassifier ());
   FlowMonitor::FlowStatsContainer stats = monitor->GetFlowStats ();
-  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
+  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin ();
+       i != stats.end (); ++i)
     {
       Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
       if (t.sourcePort == VOICE_PORT || t.destinationPort == VOICE_PORT)
@@ -1095,20 +1163,29 @@ PrintFlowMonitorStats (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmonHelpe
         {
           protoStream.str ("UDP");
         }
-      Time txDuration = i->second.timeLastTxPacket - i->second.timeFirstTxPacket;
-      std::cout << "Flow " << i->first << " (" << t.sourceAddress << ":" << t.sourcePort << " -> " << t.destinationAddress << ":" << t.destinationPort << ") proto " << protoStream.str () << "\n";
+      Time txDuration = i->second.timeLastTxPacket;
+      std::cout << "Flow " << i->first << " (" << t.sourceAddress << ":" << t.sourcePort << " -> "
+                << t.destinationAddress << ":" << t.destinationPort << ") proto "
+                << protoStream.str () << "\n";
       std::cout << "  Tx Packets:  " << i->second.txPackets << "\n";
       std::cout << "  Tx Bytes:    " << i->second.txBytes << "\n";
       std::cout << "  Tx duration: " << txDuration.GetSeconds () << " s\n";
-      std::cout << "  TxOffered:   " << static_cast<double> (i->second.txBytes * 8.0) / txDuration.GetMicroSeconds () << " Mbps\n";
+      std::cout << "  TxOffered:   "
+                << static_cast<double> (i->second.txBytes * 8.0) / txDuration.GetMicroSeconds ()
+                << " Mbps\n";
       std::cout << "  Rx Bytes:    " << i->second.rxBytes << "\n";
       if (i->second.rxPackets > 0)
         {
           // Measure the duration of the flow from receiver's perspective
           Time rxDuration = i->second.timeLastRxPacket - i->second.timeFirstRxPacket;
-          std::cout << "  Throughput:  " << static_cast<double> (i->second.rxBytes * 8.0) / rxDuration.GetMicroSeconds ()  << " Mbps\n";
-          std::cout << "  Mean delay:  " << 1000 * i->second.delaySum.GetSeconds () / i->second.rxPackets << " ms\n";
-          std::cout << "  Mean jitter: " << 1000 * i->second.jitterSum.GetSeconds () / i->second.rxPackets  << " ms\n";
+          std::cout << "  Throughput:  "
+                    << static_cast<double> (i->second.rxBytes * 8.0) / rxDuration.GetMicroSeconds ()
+                    << " Mbps\n";
+
+          std::cout << "  Mean delay:  "
+                    << 1000 * i->second.delaySum.GetSeconds () / i->second.rxPackets << " ms\n";
+          std::cout << "  Mean jitter: "
+                    << 1000 * i->second.jitterSum.GetSeconds () / i->second.rxPackets << " ms\n";
           std::cout << "  Rx duration: " << rxDuration.GetSeconds () << " s\n";
         }
       else
@@ -1125,10 +1202,8 @@ bool
 MatchingFlow (Ipv4FlowClassifier::FiveTuple first, Ipv4FlowClassifier::FiveTuple second)
 {
   if ((first.sourceAddress == second.destinationAddress) &&
-      (first.destinationAddress == second.sourceAddress) &&
-      (first.protocol == second.protocol) &&
-      (first.sourcePort == second.destinationPort) &&
-      (first.destinationPort == second.sourcePort))
+      (first.destinationAddress == second.sourceAddress) && (first.protocol == second.protocol) &&
+      (first.sourcePort == second.destinationPort) && (first.destinationPort == second.sourcePort))
     {
       return true;
     }
@@ -1143,29 +1218,27 @@ struct FlowRecord
 };
 
 void
-SaveCtrlSigStats (std::string filename, const std::vector<CtrlSignalLog> & ctrlsig)
+SaveCtrlSigStats (std::string filename, const std::vector<CtrlSignalLog> &ctrlsig)
 {
   std::ofstream outFile;
   outFile.open (filename.c_str (), std::ofstream::out | std::ofstream::app);
   outFile.setf (std::ios_base::fixed);
 
-  if(!outFile.is_open())
+  if (!outFile.is_open ())
     {
-     NS_LOG_ERROR("Can't open file " << filename);
+      NS_LOG_ERROR ("Can't open file " << filename);
     }
 
-   outFile << "#time(s) nodeId CtrlType" << std::endl;
+  outFile << "#time(s) nodeId CtrlType" << std::endl;
 
-   for (std::vector<CtrlSignalLog>::size_type i = 0; i != ctrlsig.size (); i++)
+  for (std::vector<CtrlSignalLog>::size_type i = 0; i != ctrlsig.size (); i++)
     {
-      outFile << ctrlsig[i].m_time.GetSeconds() << " ";
+      outFile << ctrlsig[i].m_time.GetSeconds () << " ";
       outFile << ctrlsig[i].m_nodeId << " ";
       outFile << ctrlsig[i].m_ctrlType << std::endl;
     }
   outFile.close ();
-
 }
-
 
 void
 SaveSpectrumPhyStats (std::string filename, const std::vector<SignalArrival> &arrivals)
@@ -1186,12 +1259,13 @@ SaveSpectrumPhyStats (std::string filename, const std::vector<SignalArrival> &ar
     {
       if (uintegerValue.Get () == UINT32_MAX || uintegerValue.Get () == arrivals[i].m_nodeId)
         {
-          outFile << std::setprecision (9) << std::fixed << arrivals[i].m_time.GetSeconds () <<  " ";
+          outFile << std::setprecision (9) << std::fixed << arrivals[i].m_time.GetSeconds () << " ";
           outFile << arrivals[i].m_nodeId << " ";
           outFile << ((arrivals[i].m_wifi == true) ? "wifi " : " lte ");
           outFile << arrivals[i].m_senderNodeId << " ";
-          outFile <<  arrivals[i].m_time.GetSeconds () + arrivals[i].m_duration.GetSeconds () << " ";
-          outFile << arrivals[i].m_duration.GetSeconds () * 1000.0 << " " << arrivals[i].m_power << std::endl;
+          outFile << arrivals[i].m_time.GetSeconds () + arrivals[i].m_duration.GetSeconds () << " ";
+          outFile << arrivals[i].m_duration.GetSeconds () * 1000.0 << " " << arrivals[i].m_power
+                  << std::endl;
         }
     }
   outFile.close ();
@@ -1216,7 +1290,7 @@ SaveTxopStats (std::string filename, const std::vector<TxopLog> &txopLogs)
     {
       if (uintegerValue.Get () == UINT32_MAX || uintegerValue.Get () == txopLogs[i].m_nodeId)
         {
-          outFile << std::setprecision (9) << std::fixed << txopLogs[i].m_time.GetSeconds () <<  " ";
+          outFile << std::setprecision (9) << std::fixed << txopLogs[i].m_time.GetSeconds () << " ";
           outFile << txopLogs[i].m_nodeId << " ";
           outFile << txopLogs[i].m_time.GetSeconds () + txopLogs[i].m_duration.GetSeconds () << " ";
           outFile << txopLogs[i].m_duration.GetSeconds () * 1000.0 << " " << std::endl;
@@ -1244,7 +1318,8 @@ SaveDataTxStats (std::string filename, const std::vector<DataTx> &dataTxLogs)
     {
       if (uintegerValue.Get () == UINT32_MAX || uintegerValue.Get () == dataTxLogs[i].m_nodeId)
         {
-          outFile << std::setprecision (9) << std::fixed << dataTxLogs[i].m_time.GetSeconds () <<  " ";
+          outFile << std::setprecision (9) << std::fixed << dataTxLogs[i].m_time.GetSeconds ()
+                  << " ";
           outFile << dataTxLogs[i].m_nodeId << " ";
           outFile << dataTxLogs[i].m_size << " " << std::endl;
         }
@@ -1270,7 +1345,7 @@ SaveCwStats (std::string filename, const std::vector<CwChange> &changes)
     {
       if (uintegerValue.Get () == UINT32_MAX || uintegerValue.Get () == changes[i].m_nodeId)
         {
-          outFile << std::setprecision (9) << std::fixed << changes[i].m_time.GetSeconds () <<  " ";
+          outFile << std::setprecision (9) << std::fixed << changes[i].m_time.GetSeconds () << " ";
           outFile << changes[i].m_nodeId << " ";
           outFile << changes[i].m_oldCw << " ";
           outFile << changes[i].m_newCw << std::endl;
@@ -1295,11 +1370,11 @@ SaveFailRetriesStats (std::string filename, const std::vector<WifiRetriesLog> &e
   for (std::vector<WifiRetriesLog>::size_type i = 0; i != entries.size (); i++)
     {
       //if (uintegerValue.Get () == UINT32_MAX || uintegerValue.Get () == entries[i].m_nodeId)
-        {
-          outFile << std::setprecision (9) << std::fixed << entries[i].m_time.GetSeconds () <<  " ";
-          outFile << entries[i].m_nodeId << " ";
-          outFile << entries[i].m_dest << std::endl;
-        }
+      {
+        outFile << std::setprecision (9) << std::fixed << entries[i].m_time.GetSeconds () << " ";
+        outFile << entries[i].m_nodeId << " ";
+        outFile << entries[i].m_dest << std::endl;
+      }
     }
 }
 
@@ -1320,11 +1395,11 @@ SaveRetriesStats (std::string filename, const std::vector<WifiRetriesLog> &entri
   for (std::vector<WifiRetriesLog>::size_type i = 0; i != entries.size (); i++)
     {
       //if (uintegerValue.Get () == UINT32_MAX || uintegerValue.Get () == entries[i].m_nodeId)
-        {
-          outFile << std::setprecision (9) << std::fixed << entries[i].m_time.GetSeconds () <<  " ";
-          outFile << entries[i].m_nodeId << " ";
-          outFile << entries[i].m_dest << std::endl;
-        }
+      {
+        outFile << std::setprecision (9) << std::fixed << entries[i].m_time.GetSeconds () << " ";
+        outFile << entries[i].m_nodeId << " ";
+        outFile << entries[i].m_dest << std::endl;
+      }
     }
 }
 
@@ -1344,7 +1419,7 @@ SaveVoiceStats (std::string filename, NodeContainer nodes, const std::vector<Voi
     {
       if (nodes.Contains (entries[i].m_nodeId))
         {
-          outFile << std::setprecision (9) << std::fixed << entries[i].m_time.GetSeconds () <<  " ";
+          outFile << std::setprecision (9) << std::fixed << entries[i].m_time.GetSeconds () << " ";
           outFile << entries[i].m_nodeId << " ";
           outFile << entries[i].m_seqno << " ";
           // milliseconds
@@ -1362,7 +1437,7 @@ SaveVoiceSummaryStats (std::string filename, NodeContainer nodes)
   for (uint32_t j = 0; j < sender->GetNApplications (); j++)
     {
       Ptr<Application> app = sender->GetApplication (j);
-      Ptr<VoiceApplication> voiceApp = DynamicCast <VoiceApplication> (app);
+      Ptr<VoiceApplication> voiceApp = DynamicCast<VoiceApplication> (app);
       if (voiceApp)
         {
           voiceSenderFound = true;
@@ -1396,21 +1471,17 @@ SaveVoiceSummaryStats (std::string filename, NodeContainer nodes)
           if (voiceApp)
             {
               NS_LOG_DEBUG ("Found client Voice app on node " << n->GetId ());
-              outFile << std::setw (3) << n->GetId ()
-                      << std::setw (8) << numSent
-                      << std::setw (8) << voiceApp->GetNumReceived ()
-                      << std::setw (10) << std::setprecision (3) << std::fixed
-                      << (1.0 * voiceApp->GetNumReceived ()) / numSent
-                      << std::setw (5) << voiceApp->GetNumLost ()
-                      << std::setw (8) << voiceApp->GetNumDelayed ()
+              outFile << std::setw (3) << n->GetId () << std::setw (8) << numSent << std::setw (8)
+                      << voiceApp->GetNumReceived () << std::setw (10) << std::setprecision (3)
+                      << std::fixed << (1.0 * voiceApp->GetNumReceived ()) / numSent
+                      << std::setw (5) << voiceApp->GetNumLost () << std::setw (8)
+                      << voiceApp->GetNumDelayed ()
                       // milliseconds
-                      << std::setw (12) << voiceApp->GetLatencyMean () * 1000
-                      << std::setw (14) << voiceApp->GetLatencyStddev () * 1000
-                      << std::endl;
+                      << std::setw (12) << voiceApp->GetLatencyMean () * 1000 << std::setw (14)
+                      << voiceApp->GetLatencyStddev () * 1000 << std::endl;
             }
         }
     }
-
 }
 
 void
@@ -1431,7 +1502,7 @@ SaveBackoffStats (std::string filename, const std::vector<BackoffChange> &change
     {
       if (uintegerValue.Get () == UINT32_MAX || uintegerValue.Get () == changes[i].m_nodeId)
         {
-          outFile << std::setprecision (9) << std::fixed << changes[i].m_time.GetSeconds () <<  " ";
+          outFile << std::setprecision (9) << std::fixed << changes[i].m_time.GetSeconds () << " ";
           outFile << changes[i].m_nodeId << " ";
           outFile << changes[i].m_backoff << std::endl;
         }
@@ -1456,28 +1527,32 @@ SaveHarqFeedbacksStats (std::string filename, const std::vector<HarqFeedbackLog>
     {
       if (uintegerValue.Get () == UINT32_MAX || uintegerValue.Get () == harqs[i].m_nodeId)
         {
-          outFile << std::setprecision (9) << std::fixed << harqs[i].m_time.GetSeconds () <<  " ";
+          outFile << std::setprecision (9) << std::fixed << harqs[i].m_time.GetSeconds () << " ";
           outFile << harqs[i].m_nodeId << " ";
           outFile << harqs[i].m_ackCount << " ";
           outFile << harqs[i].m_nackCount << " ";
 
-          if ((harqs[i].m_ackCount + harqs[i].m_nackCount)>0)
+          if ((harqs[i].m_ackCount + harqs[i].m_nackCount) > 0)
             {
-             outFile <<std::setprecision(2)<<((double)harqs[i].m_nackCount/(double)(harqs[i].m_ackCount + harqs[i].m_nackCount))*100 <<"%";
+              outFile << std::setprecision (2)
+                      << ((double) harqs[i].m_nackCount /
+                          (double) (harqs[i].m_ackCount + harqs[i].m_nackCount)) *
+                             100
+                      << "%";
             }
           else
             {
-              outFile <<"0";
+              outFile << "0";
             }
         }
-    /* It is possible to print RNTI of UEs that have reported harq feedback by enabling this code.
+      /* It is possible to print RNTI of UEs that have reported harq feedback by enabling this code.
      * Currently is disabled because it is easier to parse files when all rows have the same number of columns.
        for(std::vector<uint32_t>::size_type j=0; j != harqs[i].m_ueId.size(); j++)
         {
           outFile<<" "<<harqs[i].m_ueId[j]<<" ";
          }
     */
-      outFile<<std::endl;
+      outFile << std::endl;
     }
 }
 
@@ -1495,10 +1570,11 @@ SaveReservationSingalStats (std::string filename, const std::vector<ReservationS
   outFile << "#time(s) nodeId duration (msec)" << std::endl;
   for (std::vector<HarqFeedbackLog>::size_type i = 0; i != resSigs.size (); i++)
     {
-      outFile << std::setprecision (9) << std::fixed << resSigs[i].m_time.GetSeconds () <<  " ";
+      outFile << std::setprecision (9) << std::fixed << resSigs[i].m_time.GetSeconds () << " ";
       outFile << resSigs[i].m_nodeId << " ";
-      outFile << std::setprecision (9) << std::fixed << resSigs[i].m_duration.GetSeconds ()*1000 <<  " ";
-      outFile<<std::endl;
+      outFile << std::setprecision (9) << std::fixed << resSigs[i].m_duration.GetSeconds () * 1000
+              << " ";
+      outFile << std::endl;
     }
 }
 
@@ -1521,14 +1597,16 @@ SaveBeaconStats (std::string filename, const std::vector<BeaconArrival> &arrival
     {
       if (uintegerValue.Get () == UINT32_MAX || uintegerValue.Get () == arrivals[i].m_nodeId)
         {
-          outFile << std::setprecision (9) << std::fixed << arrivals[i].m_time.GetSeconds () <<  " ";
+          outFile << std::setprecision (9) << std::fixed << arrivals[i].m_time.GetSeconds () << " ";
           outFile << arrivals[i].m_nodeId << std::endl;
         }
     }
 }
 
 void
-SaveTcpFlowMonitorStats (std::string filename, std::string simulationParams, Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmonHelper, double duration)
+SaveTcpFlowMonitorStats (std::string filename, std::string simulationParams,
+                         Ptr<FlowMonitor> monitor, FlowMonitorHelper &flowmonHelper,
+                         double duration)
 {
   std::ofstream outFile;
   outFile.open (filename.c_str (), std::ofstream::out | std::ofstream::app);
@@ -1546,9 +1624,11 @@ SaveTcpFlowMonitorStats (std::string filename, std::string simulationParams, Ptr
 
   // Print per-flow statistics
   monitor->CheckForLostPackets ();
-  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmonHelper.GetClassifier ());
+  Ptr<Ipv4FlowClassifier> classifier =
+      DynamicCast<Ipv4FlowClassifier> (flowmonHelper.GetClassifier ());
   FlowMonitor::FlowStatsContainer stats = monitor->GetFlowStats ();
-  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
+  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin ();
+       i != stats.end (); ++i)
     {
       Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
       if (t.sourcePort == VOICE_PORT || t.destinationPort == VOICE_PORT)
@@ -1598,21 +1678,24 @@ SaveTcpFlowMonitorStats (std::string filename, std::string simulationParams, Ptr
     {
       // statistics for the downlink (data stream)
       FlowRecord record = downlinkFlowList[idx].first;
-      outFile << record.flowId << " " << record.fiveTuple.sourceAddress << ":" << record.fiveTuple.sourcePort
-              << " " << record.fiveTuple.destinationAddress << ":" << record.fiveTuple.destinationPort
-              << " " << record.flowStats.txPackets
-              << " " << record.flowStats.txBytes
+      outFile << record.flowId << " " << record.fiveTuple.sourceAddress << ":"
+              << record.fiveTuple.sourcePort << " " << record.fiveTuple.destinationAddress << ":"
+              << record.fiveTuple.destinationPort << " " << record.flowStats.txPackets << " "
+              << record.flowStats.txBytes
               // Mb/s
               << " " << (record.flowStats.txBytes * 8.0 / duration) / 1e6;
       if (record.flowStats.rxPackets > 0)
         {
           // Measure the duration of the flow from receiver's perspective
-          double rxDuration = record.flowStats.timeLastRxPacket.GetSeconds () - record.flowStats.timeFirstTxPacket.GetSeconds ();
-          outFile << " " << record.flowStats.rxBytes
-                  << " " << (record.flowStats.rxBytes * 8.0 / rxDuration) / 1e6
+          double rxDuration = record.flowStats.timeLastRxPacket.GetSeconds () -
+                              record.flowStats.timeFirstTxPacket.GetSeconds ();
+          outFile << " " << record.flowStats.rxBytes << " "
+                  << (record.flowStats.rxBytes * 8.0 / rxDuration) / 1e6
                   // milliseconds
-                  << " " << 1000 * record.flowStats.delaySum.GetSeconds () / record.flowStats.rxPackets;
-          outFile << " " << 1000 * record.flowStats.jitterSum.GetSeconds () / record.flowStats.rxPackets;
+                  << " "
+                  << 1000 * record.flowStats.delaySum.GetSeconds () / record.flowStats.rxPackets;
+          outFile << " "
+                  << 1000 * record.flowStats.jitterSum.GetSeconds () / record.flowStats.rxPackets;
         }
       else
         {
@@ -1626,21 +1709,26 @@ SaveTcpFlowMonitorStats (std::string filename, std::string simulationParams, Ptr
       outFile << " "; // add space separator
       // statistics for the uplink (ACK stream)
       record = downlinkFlowList[idx].second;
-      outFile << record.flowId << " " << record.fiveTuple.sourceAddress << ":" << record.fiveTuple.sourcePort << " "
-              << record.fiveTuple.destinationAddress << ":" << record.fiveTuple.destinationPort
-              << " " << record.flowStats.txPackets
-              << " " << record.flowStats.txBytes
-              << " " << (record.flowStats.txBytes * 8.0 / duration ) / 1e6;
+      outFile << record.flowId << " " << record.fiveTuple.sourceAddress << ":"
+              << record.fiveTuple.sourcePort << " " << record.fiveTuple.destinationAddress << ":"
+              << record.fiveTuple.destinationPort << " " << record.flowStats.txPackets << " "
+              << record.flowStats.txBytes << " "
+              << (record.flowStats.txBytes * 8.0 / duration) / 1e6;
       if (record.flowStats.rxPackets > 0)
         {
           // Measure the duration of the flow from receiver's perspective
-          double rxDuration = record.flowStats.timeLastRxPacket.GetSeconds () - record.flowStats.timeFirstTxPacket.GetSeconds ();
-          outFile << " " << record.flowStats.rxBytes
+          double rxDuration = record.flowStats.timeLastRxPacket.GetSeconds () -
+                              record.flowStats.timeFirstTxPacket.GetSeconds ();
+          outFile << " "
+                  << record.flowStats.rxBytes
                   // Mb/s
-                  << " " << (record.flowStats.rxBytes * 8.0 / rxDuration) / 1e6
+                  << " "
+                  << (record.flowStats.rxBytes * 8.0 / rxDuration) / 1e6
                   // milliseconds
-                  << " " << 1000 * record.flowStats.delaySum.GetSeconds () / record.flowStats.rxPackets
-                  << " " << 1000 * record.flowStats.jitterSum.GetSeconds () / record.flowStats.rxPackets;
+                  << " "
+                  << 1000 * record.flowStats.delaySum.GetSeconds () / record.flowStats.rxPackets
+                  << " "
+                  << 1000 * record.flowStats.jitterSum.GetSeconds () / record.flowStats.rxPackets;
         }
       else
         {
@@ -1656,7 +1744,9 @@ SaveTcpFlowMonitorStats (std::string filename, std::string simulationParams, Ptr
 }
 
 void
-SaveUdpFlowMonitorStats (std::string filename, std::string simulationParams, Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmonHelper, double duration)
+SaveUdpFlowMonitorStats (std::string filename, std::string simulationParams,
+                         Ptr<FlowMonitor> monitor, FlowMonitorHelper &flowmonHelper,
+                         double duration)
 {
   std::ofstream outFile;
   outFile.open (filename.c_str (), std::ofstream::out | std::ofstream::app);
@@ -1667,40 +1757,47 @@ SaveUdpFlowMonitorStats (std::string filename, std::string simulationParams, Ptr
     }
   outFile.setf (std::ios_base::fixed);
 
+
+
   // Print per-flow statistics
   monitor->CheckForLostPackets ();
+
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmonHelper.GetClassifier ());
   FlowMonitor::FlowStatsContainer stats = monitor->GetFlowStats ();
 
-  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
+  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin ();
+       i != stats.end (); ++i)
     {
       Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
       if (t.sourcePort == VOICE_PORT || t.destinationPort == VOICE_PORT)
         {
           continue; //skip voice flow
         }
-      NS_ASSERT_MSG (t.sourceAddress < t.destinationAddress ,
-                 "Flow " << t.sourceAddress << ":" << t.sourcePort << " --> " << t.destinationAddress << ":" << t.destinationPort
-                 << " is probably not downlink");
+      NS_ASSERT_MSG (t.sourceAddress < t.destinationAddress,
+                     "Flow " << t.sourceAddress << ":" << t.sourcePort << " --> "
+                             << t.destinationAddress << ":" << t.destinationPort
+                             << " is probably not downlink");
 
-      outFile << i->first
-              << " " << t.sourceAddress << ":" << t.sourcePort
-              << " " << t.destinationAddress << ":" << t.destinationPort
-              << " " << i->second.txPackets
-              << " " << i->second.txBytes
+      outFile << i->first << " " << t.sourceAddress << ":" << t.sourcePort << " "
+              << t.destinationAddress << ":" << t.destinationPort << " " << i->second.txPackets
+              << " "
+              << i->second.txBytes
               // Mb/s
               << " " << (i->second.txBytes * 8.0 / duration) / 1e6;
       if (i->second.rxPackets > 0)
         {
           // Measure the duration of the flow from receiver's perspective
-          double rxDuration = i->second.timeLastRxPacket.GetSeconds () - i->second.timeFirstTxPacket.GetSeconds ();
+          double rxDuration =
+              i->second.timeLastRxPacket.GetSeconds () - i->second.timeFirstTxPacket.GetSeconds ();
           // Mb/s
-          outFile << " " << i->second.rxBytes
+          outFile << " "
+                  << i->second.rxBytes
                   // Mb/s
-                  << " " << (i->second.rxBytes * 8.0 / rxDuration) / 1e6
+                  << " "
+                  << (i->second.rxBytes * 8.0 / rxDuration) / 1e6
                   // milliseconds
-                  << " " << 1000 * i->second.delaySum.GetSeconds () / i->second.rxPackets
-                  << " " << 1000 * i->second.jitterSum.GetSeconds () / i->second.rxPackets;
+                  << " " << 1000 * i->second.delaySum.GetSeconds () / i->second.rxPackets << " "
+                  << 1000 * i->second.jitterSum.GetSeconds () / i->second.rxPackets;
         }
       else
         {
@@ -1714,8 +1811,74 @@ SaveUdpFlowMonitorStats (std::string filename, std::string simulationParams, Ptr
   outFile.close ();
 }
 
+// void
+// SaveUdpFlowMonitorStats (std::string filename, std::string simulationParams,
+//                          Ptr<FlowMonitor> monitor, FlowMonitorHelper &flowmonHelper, double duration,
+//                          double duration_end)
+// {
+//   std::ofstream outFile;
+//   outFile.open (filename.c_str (), std::ofstream::out | std::ofstream::app);
+//   if (!outFile.is_open ())
+//     {
+//       NS_LOG_ERROR ("Can't open file " << filename);
+//       return;
+//     }
+//   outFile.setf (std::ios_base::fixed);
+
+//   // Print per-flow statistics
+//   monitor->CheckForLostPackets ();
+//   Ptr<Ipv4FlowClassifier> classifier =
+//       DynamicCast<Ipv4FlowClassifier> (flowmonHelper.GetClassifier ());
+//   FlowMonitor::FlowStatsContainer stats = monitor->GetFlowStats ();
+//   for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin ();
+//        i != stats.end (); ++i)
+//     {
+//       Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
+//       if (t.sourcePort == VOICE_PORT || t.destinationPort == VOICE_PORT)
+//         {
+//           continue; //skip voice flow
+//         }
+//       NS_ASSERT_MSG (t.sourceAddress < t.destinationAddress,
+//                      "Flow " << t.sourceAddress << ":" << t.sourcePort << " --> "
+//                              << t.destinationAddress << ":" << t.destinationPort
+//                              << " is probably not downlink");
+
+//       outFile << i->first << " " << t.sourceAddress << ":" << t.sourcePort << " "
+//               << t.destinationAddress << ":" << t.destinationPort << " " << i->second.txPackets
+//               << " "
+//               << i->second.txBytes
+//               // Mb/s
+//               << " " << (i->second.txBytes * 8.0 / duration) / 1e6;
+//       if (i->second.rxPackets > 0)
+//         {
+//           // Measure the duration of the flow from receiver's perspective
+//           double rxDuration =
+//               i->second.timeLastRxPacket.GetSeconds () - i->second.timeFirstTxPacket.GetSeconds ();
+//           // Mb/s
+//           outFile << " "
+//                   << i->second.rxBytes
+//                   // Mb/s
+//                   << " "
+//                   << (i->second.rxBytes * 8.0 / rxDuration) / 1e6
+//                   // milliseconds
+//                   << " " << 1000 * i->second.delaySum.GetSeconds () / i->second.rxPackets << " "
+//                   << 1000 * i->second.jitterSum.GetSeconds () / i->second.rxPackets;
+//         }
+//       else
+//         {
+//           outFile << "  0" // rxBytes
+//                   << "  0" // throughput
+//                   << "  0" // delaySum
+//                   << "  0"; // jitterSum
+//         }
+//       outFile << " " << i->second.rxPackets << std::endl;
+//     }
+//   outFile.close ();
+// }
+
 void
-SaveAssociationStats(std::string filename, const std::vector<AssociationEvent> &events, NodeContainer bsnodes, NodeContainer uenodes)
+SaveAssociationStats (std::string filename, const std::vector<AssociationEvent> &events,
+                      NodeContainer bsnodes, NodeContainer uenodes)
 {
   std::ofstream outFile;
   outFile.open (filename.c_str (), std::ofstream::out | std::ofstream::app);
@@ -1731,11 +1894,13 @@ SaveAssociationStats(std::string filename, const std::vector<AssociationEvent> &
 
   for (std::vector<AssociationEvent>::size_type i = 0; i < events.size (); i++)
     {
-       outFile<< std::setprecision (6) << std::fixed << events[i].m_time.GetSeconds () << " " << events[i].m_nodeId << " " << events[i].m_type << " " << events[i].m_address <<" "<<events[i].m_apNodeId<< std::endl;
+      outFile << std::setprecision (6) << std::fixed << events[i].m_time.GetSeconds () << " "
+              << events[i].m_nodeId << " " << events[i].m_type << " " << events[i].m_address << " "
+              << events[i].m_apNodeId << std::endl;
     }
 
-  outFile  << "\n#--- LAA/LTE eNB info ---" << std::endl;
-  outFile<<"nodeId(eNB) IP(eNB) cellId(eNB) position(eNB)"<<std::endl;
+  outFile << "\n#--- LAA/LTE eNB info ---" << std::endl;
+  outFile << "nodeId(eNB) IP(eNB) cellId(eNB) position(eNB)" << std::endl;
 
   for (NodeContainer::Iterator it = bsnodes.Begin (); it != bsnodes.End (); ++it)
     {
@@ -1744,21 +1909,22 @@ SaveAssociationStats(std::string filename, const std::vector<AssociationEvent> &
 
       for (int j = 0; j < nDevs; j++)
         {
-          Ptr<LteEnbNetDevice> enbdev = bsnode->GetDevice (j)->GetObject <LteEnbNetDevice> ();
+          Ptr<LteEnbNetDevice> enbdev = bsnode->GetDevice (j)->GetObject<LteEnbNetDevice> ();
           if (enbdev)
             {
               Vector pos = bsnode->GetObject<MobilityModel> ()->GetPosition ();
-              Ptr<Ipv4> ipv4nue = bsnode->GetObject<Ipv4>();
-              Ipv4InterfaceAddress ipv4_int_addr_nenb = ipv4nue->GetAddress(1,0);
-              Ipv4Address ip_addr_nenb = ipv4_int_addr_nenb.GetLocal();
+              Ptr<Ipv4> ipv4nue = bsnode->GetObject<Ipv4> ();
+              Ipv4InterfaceAddress ipv4_int_addr_nenb = ipv4nue->GetAddress (1, 0);
+              Ipv4Address ip_addr_nenb = ipv4_int_addr_nenb.GetLocal ();
 
-              outFile<<bsnode->GetId ()<<" "<<ip_addr_nenb<<" "<<enbdev->GetCellId()<<" "<< pos.x << "," << pos.y<< std::endl;
-           }
+              outFile << bsnode->GetId () << " " << ip_addr_nenb << " " << enbdev->GetCellId ()
+                      << " " << pos.x << "," << pos.y << std::endl;
+            }
         }
     }
 
-  outFile  << "\n#--- LAA/LTE UE info ---" << std::endl;
-  outFile<<"nodeId(UE) IP(UE) Imsi(UE) cellId(UE) position(UE)"<<std::endl;
+  outFile << "\n#--- LAA/LTE UE info ---" << std::endl;
+  outFile << "nodeId(UE) IP(UE) Imsi(UE) cellId(UE) position(UE)" << std::endl;
 
   for (NodeContainer::Iterator it = uenodes.Begin (); it != uenodes.End (); ++it)
     {
@@ -1767,27 +1933,32 @@ SaveAssociationStats(std::string filename, const std::vector<AssociationEvent> &
       uint64_t lteUeImsi;
       for (int j = 0; j < nDevs; j++)
         {
-          Ptr<LteUeNetDevice> uedev = uenode->GetDevice (j)->GetObject <LteUeNetDevice> ();
+          Ptr<LteUeNetDevice> uedev = uenode->GetDevice (j)->GetObject<LteUeNetDevice> ();
           if (uedev)
             {
-              lteUeImsi =uedev->GetImsi();
+              lteUeImsi = uedev->GetImsi ();
               Vector pos = uenode->GetObject<MobilityModel> ()->GetPosition ();
-              Ptr<Ipv4> ipv4nue = uenode->GetObject<Ipv4>();
-              Ptr<LteUeRrc> lteUeRrc = uedev->GetRrc();
-              Ipv4InterfaceAddress ipv4_int_addr_nue = ipv4nue->GetAddress(1,0);
-              Ipv4Address ip_addr_nue = ipv4_int_addr_nue.GetLocal();
+              Ptr<Ipv4> ipv4nue = uenode->GetObject<Ipv4> ();
+              Ptr<LteUeRrc> lteUeRrc = uedev->GetRrc ();
+              Ipv4InterfaceAddress ipv4_int_addr_nue = ipv4nue->GetAddress (1, 0);
+              Ipv4Address ip_addr_nue = ipv4_int_addr_nue.GetLocal ();
 
-              outFile<<uenode->GetId ()<<" "<<ip_addr_nue<<" "<<lteUeImsi<<" "<<lteUeRrc->GetCellId()<<" " << pos.x << "," << pos.y<< std::endl;
-
-           }
-         }
+              outFile << uenode->GetId () << " " << ip_addr_nue << " " << lteUeImsi << " "
+                      << lteUeRrc->GetCellId () << " " << pos.x << "," << pos.y << std::endl;
+            }
+        }
     }
 
   outFile.close ();
 }
 
 void
-ConfigureLte (Ptr<LteHelper> lteHelper, Ptr<PointToPointEpcHelper> epcHelper, Ipv4AddressHelper& internetIpv4Helper, NodeContainer bsNodes, NodeContainer ueNodes, NodeContainer clientNodes, NetDeviceContainer& bsDevices, NetDeviceContainer& ueDevices, struct PhyParams phyParams, std::vector<LteSpectrumValueCatcher>& lteDlSinrCatcherVector, std::bitset<40> absPattern, Transport_e transport)
+ConfigureLte (Ptr<LteHelper> lteHelper, Ptr<PointToPointEpcHelper> epcHelper,
+              Ipv4AddressHelper &internetIpv4Helper, NodeContainer bsNodes, NodeContainer ueNodes,
+              NodeContainer clientNodes, NetDeviceContainer &bsDevices,
+              NetDeviceContainer &ueDevices, struct PhyParams phyParams,
+              std::vector<LteSpectrumValueCatcher> &lteDlSinrCatcherVector,
+              std::bitset<40> absPattern, Transport_e transport)
 {
   Config::SetDefault ("ns3::LteRlcUm::MaxTxBufferSize", UintegerValue (2000000));
 
@@ -1796,6 +1967,9 @@ ConfigureLte (Ptr<LteHelper> lteHelper, Ptr<PointToPointEpcHelper> epcHelper, Ip
   Ptr<Node> clientNode = clientNodes.Get (0);
   Ptr<Node> pgw = epcHelper->GetPgwNode ();
   PointToPointHelper p2ph;
+  /* Rashed Nov 29, 2021
+  * Making similar ground for WiFi and LTE
+  */
   p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
   p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
   p2ph.SetChannelAttribute ("Delay", TimeValue (Seconds (0.0)));
@@ -1807,10 +1981,9 @@ ConfigureLte (Ptr<LteHelper> lteHelper, Ptr<PointToPointEpcHelper> epcHelper, Ip
 
   // make LTE and network reachable from the client node
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
-  Ptr<Ipv4StaticRouting> clientNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (clientNode->GetObject<Ipv4> ());
+  Ptr<Ipv4StaticRouting> clientNodeStaticRouting =
+      ipv4RoutingHelper.GetStaticRouting (clientNode->GetObject<Ipv4> ());
   clientNodeStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
-
-
 
   // LTE configuration parametes
   lteHelper->SetSchedulerType ("ns3::PfFfMacScheduler");
@@ -1822,7 +1995,7 @@ ConfigureLte (Ptr<LteHelper> lteHelper, Ptr<PointToPointEpcHelper> epcHelper, Ip
   lteHelper->SetUeDeviceAttribute ("DlEarfcn", UintegerValue (255444));
   // LTE calibration
   lteHelper->SetEnbAntennaModelType ("ns3::IsotropicAntennaModel");
-  lteHelper->SetEnbAntennaModelAttribute ("Gain",   DoubleValue (phyParams.m_bsTxGain));
+  lteHelper->SetEnbAntennaModelAttribute ("Gain", DoubleValue (phyParams.m_bsTxGain));
   Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (phyParams.m_bsTxPower));
   Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (phyParams.m_ueTxPower));
 
@@ -1842,7 +2015,8 @@ ConfigureLte (Ptr<LteHelper> lteHelper, Ptr<PointToPointEpcHelper> epcHelper, Ip
     case UDP:
     case FTP:
     default:
-      Config::SetDefault ("ns3::LteEnbRrc::EpsBearerToRlcMapping", EnumValue (LteEnbRrc::RLC_UM_ALWAYS));
+      Config::SetDefault ("ns3::LteEnbRrc::EpsBearerToRlcMapping",
+                          EnumValue (LteEnbRrc::RLC_UM_ALWAYS));
       break;
     }
 
@@ -1860,7 +2034,6 @@ ConfigureLte (Ptr<LteHelper> lteHelper, Ptr<PointToPointEpcHelper> epcHelper, Ip
 
   NetDeviceContainer ueLteDevs (ueDevices);
 
-
   // additional UE-specific configuration
   Ipv4InterfaceContainer clientIpIfaces;
   NS_ASSERT_MSG (lteDlSinrCatcherVector.empty (), "Must provide an empty lteDlSinCatcherVector");
@@ -1875,17 +2048,20 @@ ConfigureLte (Ptr<LteHelper> lteHelper, Ptr<PointToPointEpcHelper> epcHelper, Ip
       Ptr<LteUeNetDevice> ueLteDevice = ueDevice->GetObject<LteUeNetDevice> ();
 
       // assign IP address to UEs
-      Ipv4InterfaceContainer ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueDevice));
+      Ipv4InterfaceContainer ueIpIface =
+          epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueDevice));
       clientIpIfaces.Add (ueIpIface);
       // set the default gateway for the UE
       Ipv4StaticRoutingHelper ipv4RoutingHelper;
-      Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ue->GetObject<Ipv4> ());
+      Ptr<Ipv4StaticRouting> ueStaticRouting =
+          ipv4RoutingHelper.GetStaticRouting (ue->GetObject<Ipv4> ());
       ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
 
       // set up SINR monitoring
       Ptr<LtePhy> uePhy = ueLteDevice->GetPhy ()->GetObject<LtePhy> ();
-      Ptr<LteAverageChunkProcessor> monitorLteChunkProcessor  = Create<LteAverageChunkProcessor> ();
-      monitorLteChunkProcessor->AddCallback (MakeCallback (&LteSpectrumValueCatcher::ReportValue, &lteDlSinrCatcherVector.at (u)));
+      Ptr<LteAverageChunkProcessor> monitorLteChunkProcessor = Create<LteAverageChunkProcessor> ();
+      monitorLteChunkProcessor->AddCallback (
+          MakeCallback (&LteSpectrumValueCatcher::ReportValue, &lteDlSinrCatcherVector.at (u)));
       uePhy->GetDownlinkSpectrumPhy ()->AddDataSinrChunkProcessor (monitorLteChunkProcessor);
     }
 
@@ -1894,9 +2070,13 @@ ConfigureLte (Ptr<LteHelper> lteHelper, Ptr<PointToPointEpcHelper> epcHelper, Ip
 }
 
 void
-ConfigureLaa (Ptr<LteHelper> lteHelper, Ptr<PointToPointEpcHelper> epcHelper, Ipv4AddressHelper& internetIpv4Helper, NodeContainer bsNodes,
-              NodeContainer ueNodes, NodeContainer clientNodes, NetDeviceContainer& bsDevices, NetDeviceContainer& ueDevices, struct PhyParams phyParams,
-              std::vector<LteSpectrumValueCatcher>& lteDlSinrCatcherVector, std::bitset<40> absPattern, Transport_e transport, Time lbtChannelAccessManagerInstallTime)
+ConfigureLaa (Ptr<LteHelper> lteHelper, Ptr<PointToPointEpcHelper> epcHelper,
+              Ipv4AddressHelper &internetIpv4Helper, NodeContainer bsNodes, NodeContainer ueNodes,
+              NodeContainer clientNodes, NetDeviceContainer &bsDevices,
+              NetDeviceContainer &ueDevices, struct PhyParams phyParams,
+              std::vector<LteSpectrumValueCatcher> &lteDlSinrCatcherVector,
+              std::bitset<40> absPattern, Transport_e transport,
+              Time lbtChannelAccessManagerInstallTime)
 {
 
   Config::SetDefault ("ns3::LteRlcUm::MaxTxBufferSize", UintegerValue (2000000));
@@ -1923,10 +2103,11 @@ ConfigureLaa (Ptr<LteHelper> lteHelper, Ptr<PointToPointEpcHelper> epcHelper, Ip
 
       // make LTE and network reachable from the client node
       Ipv4StaticRoutingHelper ipv4RoutingHelper;
-      Ptr<Ipv4StaticRouting> clientNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (clientNode->GetObject<Ipv4> ());
-      clientNodeStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
+      Ptr<Ipv4StaticRouting> clientNodeStaticRouting =
+          ipv4RoutingHelper.GetStaticRouting (clientNode->GetObject<Ipv4> ());
+      clientNodeStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"),
+                                                  1);
     }
-
 
   // LTE configuration parametes
   lteHelper->SetSchedulerType ("ns3::PfFfMacScheduler");
@@ -1938,7 +2119,7 @@ ConfigureLaa (Ptr<LteHelper> lteHelper, Ptr<PointToPointEpcHelper> epcHelper, Ip
   lteHelper->SetUeDeviceAttribute ("DlEarfcn", UintegerValue (255444));
   // LTE calibration
   lteHelper->SetEnbAntennaModelType ("ns3::IsotropicAntennaModel");
-  lteHelper->SetEnbAntennaModelAttribute ("Gain",   DoubleValue (phyParams.m_bsTxGain));
+  lteHelper->SetEnbAntennaModelAttribute ("Gain", DoubleValue (phyParams.m_bsTxGain));
   Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (phyParams.m_bsTxPower));
   Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (phyParams.m_ueTxPower));
 
@@ -1958,14 +2139,14 @@ ConfigureLaa (Ptr<LteHelper> lteHelper, Ptr<PointToPointEpcHelper> epcHelper, Ip
     case UDP:
     case FTP:
     default:
-      Config::SetDefault ("ns3::LteEnbRrc::EpsBearerToRlcMapping", EnumValue (LteEnbRrc::RLC_UM_ALWAYS));
+      Config::SetDefault ("ns3::LteEnbRrc::EpsBearerToRlcMapping",
+                          EnumValue (LteEnbRrc::RLC_UM_ALWAYS));
       break;
     }
 
   // Create Devices and install them in the Nodes (eNBs and UEs)
   bsDevices = lteHelper->InstallEnbDevice (bsNodes);
   ueDevices = lteHelper->InstallUeDevice (ueNodes);
-
 
   // additional eNB-specific configuration
   /* for (uint32_t n = 0; n < bsDevices.GetN (); ++n)
@@ -1978,14 +2159,14 @@ ConfigureLaa (Ptr<LteHelper> lteHelper, Ptr<PointToPointEpcHelper> epcHelper, Ip
   // Check if we need to instantiate LaaWifiCoexistence helper
   if (GlobalValue::GetValueByNameFailSafe ("ChannelAccessManager", enumValue))
     {
-      enum Config_ChannelAccessManager channelAccessManager = (Config_ChannelAccessManager) enumValue.Get ();
+      enum Config_ChannelAccessManager channelAccessManager =
+          (Config_ChannelAccessManager) enumValue.Get ();
 
-      if (channelAccessManager == BasicLbt ||
-          channelAccessManager == OnlyListen ||
-          channelAccessManager == Lbt ||
-          channelAccessManager == DutyCycle)
+      if (channelAccessManager == BasicLbt || channelAccessManager == OnlyListen ||
+          channelAccessManager == Lbt || channelAccessManager == DutyCycle)
         {
-          Ptr<LaaWifiCoexistenceHelper> laaWifiCoexistenceHelper = CreateObject<LaaWifiCoexistenceHelper> ();
+          Ptr<LaaWifiCoexistenceHelper> laaWifiCoexistenceHelper =
+              CreateObject<LaaWifiCoexistenceHelper> ();
           laaWifiCoexistenceHelper->ConfigureEnbDevicesForLbt (bsDevices, phyParams);
           //Simulator::Schedule (lbtChannelAccessManagerInstallTime, &LaaWifiCoexistenceHelper::ConfigureEnbDevicesForLbt, laaWifiCoexistenceHelper, bsDevices, phyParams);
         }
@@ -1997,7 +2178,8 @@ ConfigureLaa (Ptr<LteHelper> lteHelper, Ptr<PointToPointEpcHelper> epcHelper, Ip
       NetDeviceContainer ueLteDevs (ueDevices);
       // additional UE-specific configuration
       Ipv4InterfaceContainer clientIpIfaces;
-      NS_ASSERT_MSG (lteDlSinrCatcherVector.empty (), "Must provide an empty lteDlSinCatcherVector");
+      NS_ASSERT_MSG (lteDlSinrCatcherVector.empty (),
+                     "Must provide an empty lteDlSinCatcherVector");
       // side effect: will create LteSpectrumValueCatchers
       // note that nobody else should resize this vector otherwise callbacks will be using invalid pointers
       lteDlSinrCatcherVector.resize (ueNodes.GetN ());
@@ -2009,17 +2191,21 @@ ConfigureLaa (Ptr<LteHelper> lteHelper, Ptr<PointToPointEpcHelper> epcHelper, Ip
           Ptr<LteUeNetDevice> ueLteDevice = ueDevice->GetObject<LteUeNetDevice> ();
 
           // assign IP address to UEs
-          Ipv4InterfaceContainer ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueDevice));
+          Ipv4InterfaceContainer ueIpIface =
+              epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueDevice));
           clientIpIfaces.Add (ueIpIface);
           // set the default gateway for the UE
           Ipv4StaticRoutingHelper ipv4RoutingHelper;
-          Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ue->GetObject<Ipv4> ());
+          Ptr<Ipv4StaticRouting> ueStaticRouting =
+              ipv4RoutingHelper.GetStaticRouting (ue->GetObject<Ipv4> ());
           ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
 
           // set up SINR monitoring
           Ptr<LtePhy> uePhy = ueLteDevice->GetPhy ()->GetObject<LtePhy> ();
-          Ptr<LteAverageChunkProcessor> monitorLteChunkProcessor  = Create<LteAverageChunkProcessor> ();
-          monitorLteChunkProcessor->AddCallback (MakeCallback (&LteSpectrumValueCatcher::ReportValue, &lteDlSinrCatcherVector.at (u)));
+          Ptr<LteAverageChunkProcessor> monitorLteChunkProcessor =
+              Create<LteAverageChunkProcessor> ();
+          monitorLteChunkProcessor->AddCallback (
+              MakeCallback (&LteSpectrumValueCatcher::ReportValue, &lteDlSinrCatcherVector.at (u)));
           uePhy->GetDownlinkSpectrumPhy ()->AddDataSinrChunkProcessor (monitorLteChunkProcessor);
         }
       // instruct all devices to attach using the LTE initial cell selection procedure
@@ -2028,7 +2214,8 @@ ConfigureLaa (Ptr<LteHelper> lteHelper, Ptr<PointToPointEpcHelper> epcHelper, Ip
 }
 
 NetDeviceContainer
-ConfigureWifiAp (NodeContainer bsNodes, struct PhyParams phyParams, Ptr<SpectrumChannel> channel, Ssid ssid)
+ConfigureWifiAp (NodeContainer bsNodes, struct PhyParams phyParams, Ptr<SpectrumChannel> channel,
+                 Ssid ssid)
 {
   QueueSizeValue queueSize;
   GlobalValue::GetValueByName ("wifiQueueMaxSize", queueSize);
@@ -2056,24 +2243,58 @@ ConfigureWifiAp (NodeContainer bsNodes, struct PhyParams phyParams, Ptr<Spectrum
   wifi.SetStandard (WIFI_STANDARD_80211n_5GHZ);
   WifiMacHelper mac;
 
-  mac.SetType ("ns3::ApWifiMac",
-               "Ssid", SsidValue (ssid),
-               "EnableBeaconJitter", BooleanValue (true));
+  mac.SetType ("ns3::ApWifiMac", "Ssid", SsidValue (ssid), "EnableBeaconJitter",
+               BooleanValue (true));
+
+  /*Rashed Nov 24, 2021
+  *
+  */
+  BooleanValue booleanValue;
+  UintegerValue uintegerValue;
+  WifiMacHelper malicious_mac;
+
+  malicious_mac.SetType ("ns3::ApWifiMac", "Ssid", SsidValue (ssid), "EnableBeaconJitter",
+                         BooleanValue (true));
+
+  GlobalValue::GetValueByName ("isSelfishBackoffScenario", booleanValue);
+  GlobalValue::GetValueByName ("selfishBackoffMaliciousAPID", uintegerValue);
+  bool isSelfishBackoffScenario = booleanValue;
+  uint32_t malicious_index = uintegerValue.Get ();
 
   for (uint32_t i = 0; i < bsNodes.GetN (); i++)
     {
+
       //uint32_t channelNumber = 36 + 4 * (i%4);
       uint32_t channelNumber = 36;
       spectrumPhy.Set ("ChannelNumber", UintegerValue (channelNumber));
-      apDevices.Add (wifi.Install (spectrumPhy, mac, bsNodes.Get (i)));
+      if (isSelfishBackoffScenario == true)
+        {
+          std::cout << "Its a malicious scenario with malicious index:" << malicious_index
+                    << std::endl;
+          if (i == malicious_index)
+            {
+              std::cout << "Malicious Node is being executed. Node ID " << i << " Malicious ID "
+                        << malicious_index << std::endl;
+              apDevices.Add (wifi.Install (spectrumPhy, malicious_mac, bsNodes.Get (i)));
+            }
+          else
+            {
+              apDevices.Add (wifi.Install (spectrumPhy, mac, bsNodes.Get (i)));
+            }
+        }
+      else
+        {
+          apDevices.Add (wifi.Install (spectrumPhy, mac, bsNodes.Get (i)));
+        }
     }
-   // Set channel width
+  // Set channel width
   Config::Set ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/ChannelWidth", UintegerValue (20));
 
   // Set guard interval
-  Config::Set ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/HtConfiguration/ShortGuardIntervalSupported", BooleanValue (true));
+  Config::Set (
+      "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/HtConfiguration/ShortGuardIntervalSupported",
+      BooleanValue (true));
 
-  BooleanValue booleanValue;
   bool found;
   found = GlobalValue::GetValueByNameFailSafe ("pcapEnabled", booleanValue);
   if (found && booleanValue.Get ())
@@ -2091,7 +2312,8 @@ ConfigureWifiAp (NodeContainer bsNodes, struct PhyParams phyParams, Ptr<Spectrum
 }
 
 NetDeviceContainer
-ConfigureWifiSta (NodeContainer ueNodes, struct PhyParams phyParams, Ptr<SpectrumChannel> channel, Ssid ssid)
+ConfigureWifiSta (NodeContainer ueNodes, struct PhyParams phyParams, Ptr<SpectrumChannel> channel,
+                  Ssid ssid)
 {
   QueueSizeValue queueSize;
   GlobalValue::GetValueByName ("wifiQueueMaxSize", queueSize);
@@ -2120,9 +2342,7 @@ ConfigureWifiSta (NodeContainer ueNodes, struct PhyParams phyParams, Ptr<Spectru
   wifi.SetStandard (WIFI_STANDARD_80211n_5GHZ);
   WifiMacHelper mac;
 
-  mac.SetType ("ns3::StaWifiMac",
-               "Ssid", SsidValue (ssid),
-               "ActiveProbing", BooleanValue (false));
+  mac.SetType ("ns3::StaWifiMac", "Ssid", SsidValue (ssid), "ActiveProbing", BooleanValue (false));
 
   for (uint32_t i = 0; i < ueNodes.GetN (); i++)
     {
@@ -2131,11 +2351,13 @@ ConfigureWifiSta (NodeContainer ueNodes, struct PhyParams phyParams, Ptr<Spectru
       spectrumPhy.Set ("ChannelNumber", UintegerValue (channelNumber));
       staDevices.Add (wifi.Install (spectrumPhy, mac, ueNodes.Get (i)));
     }
-   // Set channel width
+  // Set channel width
   Config::Set ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/ChannelWidth", UintegerValue (20));
 
   // Set guard interval
-  Config::Set ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/HtConfiguration/ShortGuardIntervalSupported", BooleanValue (true));
+  Config::Set (
+      "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/HtConfiguration/ShortGuardIntervalSupported",
+      BooleanValue (true));
 
   BooleanValue booleanValue;
   bool found;
@@ -2161,13 +2383,15 @@ ConfigureUdpServers (NodeContainer servers, Time startTime, Time stopTime)
   uint32_t port = UDP_SERVER_PORT; // discard
   UdpServerHelper myServer (port);
   serverApps = myServer.Install (servers);
+  
   serverApps.Start (startTime);
   serverApps.Stop (stopTime);
   return serverApps;
 }
 
 ApplicationContainer
-ConfigureUdpClients (NodeContainer client, Ipv4InterfaceContainer servers, Time startTime, Time stopTime, Time interval)
+ConfigureUdpClients (NodeContainer client, Ipv4InterfaceContainer servers, Time startTime,
+                     Time stopTime, Time interval)
 {
   // Randomly distribute the start times
   Ptr<UniformRandomVariable> randomVariable = CreateObject<UniformRandomVariable> ();
@@ -2300,31 +2524,37 @@ ConfigureTcpClients (NodeContainer client, Ipv4InterfaceContainer servers, Time 
 }
 
 void
-StartFileTransfer (Ptr<ExponentialRandomVariable> ftpArrivals, ApplicationContainer clients, uint32_t nextClient, Time stopTime)
+StartFileTransfer (Ptr<ExponentialRandomVariable> ftpArrivals, ApplicationContainer clients,
+                   uint32_t nextClient, Time stopTime)
 {
   NS_ASSERT (nextClient >= 0 && nextClient < clients.GetN ());
   Ptr<Application> app = clients.Get (nextClient);
   NS_ASSERT (app);
-  NS_LOG_DEBUG ("Starting file transfer on client " << nextClient << " node number " << app->GetNode ()->GetId () << " at time " << Simulator::Now ().GetSeconds ());
-  Ptr<FileTransferApplication> fileTransfer = DynamicCast <FileTransferApplication> (app);
+  NS_LOG_DEBUG ("Starting file transfer on client " << nextClient << " node number "
+                                                    << app->GetNode ()->GetId () << " at time "
+                                                    << Simulator::Now ().GetSeconds ());
+  Ptr<FileTransferApplication> fileTransfer = DynamicCast<FileTransferApplication> (app);
   NS_ASSERT (fileTransfer);
   fileTransfer->SendFile ();
 
   nextClient += 1;
   if (nextClient == clients.GetN ())
     {
-      NS_LOG_DEBUG ("Next transfer will start a new set of file transfers across " << clients.GetN () << " clients");
+      NS_LOG_DEBUG ("Next transfer will start a new set of file transfers across "
+                    << clients.GetN () << " clients");
       nextClient = 0;
     }
   Time nextTime = Seconds (ftpArrivals->GetValue ());
   if (Simulator::Now () + nextTime < stopTime)
     {
-      Simulator::Schedule (nextTime, &StartFileTransfer, ftpArrivals, clients, nextClient, stopTime);
+      Simulator::Schedule (nextTime, &StartFileTransfer, ftpArrivals, clients, nextClient,
+                           stopTime);
     }
 }
 
 void
-PrintGnuplottableNodeListToFile (std::string filename, NodeContainer nodes, bool printId, std::string label, std::string howToPlot)
+PrintGnuplottableNodeListToFile (std::string filename, NodeContainer nodes, bool printId,
+                                 std::string label, std::string howToPlot)
 {
   std::ofstream outFile;
   outFile.open (filename.c_str (), std::ios_base::out | std::ios_base::trunc);
@@ -2343,28 +2573,29 @@ PrintGnuplottableNodeListToFile (std::string filename, NodeContainer nodes, bool
         {
           outFile << label << node->GetId ();
         }
-      outFile << "\" at " << pos.x << "," << pos.y
-              << " " << howToPlot
-              << std::endl;
+      outFile << "\" at " << pos.x << "," << pos.y << " " << howToPlot << std::endl;
     }
 }
 
 void
-ConfigureAndRunScenario (Config_e cellConfigA,
-                         Config_e cellConfigB,
-                         NodeContainer bsNodesA,
-                         NodeContainer bsNodesB,
-                         NodeContainer ueNodesA,
-                         NodeContainer ueNodesB,
-                         struct PhyParams phyParams,
-                         Time durationTime,
-                         Transport_e transport,
-                         std::string propagationLossModel,
-                         bool disableApps,
-                         double lteDutyCycle,
-                         bool generateRem,
-                         std::string outFileName,
-                         std::string simulationParams)
+handleScheduledEvent (std::string simulationParams, Ptr<FlowMonitor> monitor, double duration)
+{
+  // std::cout << "ExampleFunction received event at "
+  //           << Simulator::Now ().GetSeconds () << "s" << std::endl;
+
+  FlowMonitor::FlowStatsContainer flw = monitor->GetFlowStats ();
+  std::cout << "Got flw" << std::endl;
+
+  interval_simulation = interval_simulation + Seconds (1);
+  std::cout << "Interval simulation" << interval_simulation << std::endl;
+}
+
+void
+ConfigureAndRunScenario (Config_e cellConfigA, Config_e cellConfigB, NodeContainer bsNodesA,
+                         NodeContainer bsNodesB, NodeContainer ueNodesA, NodeContainer ueNodesB,
+                         struct PhyParams phyParams, Time durationTime, Transport_e transport,
+                         std::string propagationLossModel, bool disableApps, double lteDutyCycle,
+                         bool generateRem, std::string outFileName, std::string simulationParams)
 {
   DoubleValue doubleValue;
   BooleanValue booleanValue;
@@ -2394,11 +2625,13 @@ ConfigureAndRunScenario (Config_e cellConfigA,
   Config::SetDefault ("ns3::LteSpectrumPhy::CtrlErrorModelEnabled", BooleanValue (false));
   Config::SetDefault ("ns3::LteSpectrumPhy::DataErrorModelEnabled", BooleanValue (true));
 
-  Config::SetDefault ("ns3::LteEnbPhy::ChannelAccessManagerStartTime", TimeValue (lbtChannelAccessManagerInstallTime));
+  Config::SetDefault ("ns3::LteEnbPhy::ChannelAccessManagerStartTime",
+                      TimeValue (lbtChannelAccessManagerInstallTime));
   // defines a time until which mibs and sibs will be generated and transmitted, after that time no mibs/sibs ctrl messages will be generated
   GlobalValue::GetValueByName ("disableMibAndSibStartupTime", doubleValue);
   Time disableMibAndSibStartupTime = Seconds (doubleValue.Get ());
-  Config::SetDefault ("ns3::LteEnbPhy::DisableMibAndSibStartupTime", TimeValue (disableMibAndSibStartupTime));
+  Config::SetDefault ("ns3::LteEnbPhy::DisableMibAndSibStartupTime",
+                      TimeValue (disableMibAndSibStartupTime));
   GlobalValue::GetValueByName ("mibPeriod", uValue);
   Config::SetDefault ("ns3::LteEnbPhy::MibPeriod", UintegerValue (uValue.Get ()));
   GlobalValue::GetValueByName ("sibPeriod", uValue);
@@ -2413,16 +2646,17 @@ ConfigureAndRunScenario (Config_e cellConfigA,
   GlobalValue::GetValueByName ("dropPackets", booleanValue);
   Config::SetDefault ("ns3::LteEnbPhy::DropPackets", booleanValue);
 
-
-  GlobalValue::GetValueByName("rlcAmRbsTimer", uValue);
-  Config::SetDefault ("ns3::LteRlcAm::ReportBufferStatusTimer", TimeValue (MilliSeconds(uValue.Get ())));
+  GlobalValue::GetValueByName ("rlcAmRbsTimer", uValue);
+  Config::SetDefault ("ns3::LteRlcAm::ReportBufferStatusTimer",
+                      TimeValue (MilliSeconds (uValue.Get ())));
 
   // We need to do more tests with different value for LteRlcAm buffer status timer.
   // We have noticed that in general can imrove performance.
   //Config::SetDefault ("ns3::LteRlcAm::ReportBufferStatusTimer", TimeValue (MilliSeconds(1)));
 
   // VoiceApplication defaults
-  Config::SetDefault ("ns3::VoiceApplication::Protocol", TypeIdValue (UdpSocketFactory::GetTypeId ()));
+  Config::SetDefault ("ns3::VoiceApplication::Protocol",
+                      TypeIdValue (UdpSocketFactory::GetTypeId ()));
   Config::SetDefault ("ns3::VoiceApplication::Interval", TimeValue (MilliSeconds (10)));
 
   bool laaNodeEnabled = false;
@@ -2430,7 +2664,7 @@ ConfigureAndRunScenario (Config_e cellConfigA,
   bool lteUsed = ((cellConfigA == LTE) || (cellConfigB == LTE));
   bool laaUsed = ((cellConfigA == LAA) || (cellConfigB == LAA));
   // this variable is not used in all scenarios thus might not be defined
-  if (GlobalValue::GetValueByNameFailSafe ("laaNodeEnabled",booleanValue))
+  if (GlobalValue::GetValueByNameFailSafe ("laaNodeEnabled", booleanValue))
     {
       laaNodeEnabled = booleanValue.Get ();
     }
@@ -2459,7 +2693,7 @@ ConfigureAndRunScenario (Config_e cellConfigA,
   GlobalValue::GetValueByName ("udpRate", dataRateValue);
   UintegerValue uintegerValue;
   GlobalValue::GetValueByName ("udpPacketSize", uintegerValue);
-  uint64_t bitRate = dataRateValue.Get().GetBitRate ();
+  uint64_t bitRate = dataRateValue.Get ().GetBitRate ();
   uint32_t packetSize = uintegerValue.Get (); // bytes
   double interval = static_cast<double> (packetSize * 8) / bitRate;
   Time udpInterval;
@@ -2467,32 +2701,37 @@ ConfigureAndRunScenario (Config_e cellConfigA,
   // if bitRate >= UDP_SATURATION_RATE, and the spreadUdpLoad optimization is
   // enabled,  spread the offered load across BS/UE in the cell
   GlobalValue::GetValueByName ("spreadUdpLoad", booleanValue);
+  std::cout << "Spread UDP Load " << booleanValue << std::endl;
   if (bitRate < UDP_SATURATION_RATE || booleanValue.Get () == false)
     {
       udpInterval = Seconds (interval);
     }
   else
     {
-      NS_LOG_DEBUG ("Applying spreadUdpLoad optimization for factor " << ueNodesA.GetN () / static_cast<double> (bsNodesA.GetN ()));
-      udpInterval = Seconds ((interval * ueNodesA.GetN ()) / bsNodesA.GetN ());
+      // NS_LOG_DEBUG ("Applying spreadUdpLoad optimization for factor "
+      //               << ueNodesA.GetN () / static_cast<double> (bsNodesA.GetN ()));
+      // udpInterval = Seconds ((interval * ueNodesA.GetN ()) / bsNodesA.GetN ());//+106666ns
+      udpInterval = Seconds (interval);
     }
+
+  std::cout << " UDP Interval " << udpInterval << std::endl; //+2.66667e+07ns
+  std::cout << "UDP Packet size" << packetSize << std::endl;
+
   NS_LOG_DEBUG ("UDP will use application interval " << udpInterval.GetSeconds () << " sec");
 
   std::cout << "Running simulation for " << durationTime.GetSeconds () << " sec of data transfer; "
             << stopTime.GetSeconds () << " sec overall" << std::endl;
 
-  std::cout << "Operator A: " << CellConfigToString (cellConfigA)
-            << "; number of cells " << bsNodesA.GetN () << "; number of UEs "
-            << ueNodesA.GetN () << std::endl;
-  std::cout << "Operator B: " << CellConfigToString (cellConfigB)
-            << "; number of cells " << bsNodesB.GetN () << "; number of UEs "
-            << ueNodesB.GetN () << std::endl;
+  std::cout << "Operator A: " << CellConfigToString (cellConfigA) << "; number of cells "
+            << bsNodesA.GetN () << "; number of UEs " << ueNodesA.GetN () << std::endl;
+  std::cout << "Operator B: " << CellConfigToString (cellConfigB) << "; number of cells "
+            << bsNodesB.GetN () << "; number of UEs " << ueNodesB.GetN () << std::endl;
 
   // All application data will be sourced from the client node so that
   // it shows up on the downlink
-  NodeContainer clientNodesA;  // for the backhaul application client
+  NodeContainer clientNodesA; // for the backhaul application client
   clientNodesA.Create (1); // create one remote host for sourcing traffic
-  NodeContainer clientNodesB;  // for the backhaul application client
+  NodeContainer clientNodesB; // for the backhaul application client
   clientNodesB.Create (1); // create one remote host for sourcing traffic
 
   // For Wi-Fi, the client node needs to be connected to the bsNodes via a single
@@ -2542,14 +2781,12 @@ ConfigureAndRunScenario (Config_e cellConfigA,
   Ptr<SpectrumChannel> dlSpectrumChannel = lteHelper->GetDownlinkSpectrumChannel ();
   //           loss  = txpower -noisepower            -snr    ;
   double dlMaxLossDb = (phyParams.m_bsTxPower + phyParams.m_bsTxGain) -
-    (-174.0 + 73.0 + phyParams.m_ueNoiseFigure) -
-    (-15.0);
+                       (-174.0 + 73.0 + phyParams.m_ueNoiseFigure) - (-15.0);
   dlSpectrumChannel->SetAttribute ("MaxLossDb", DoubleValue (dlMaxLossDb));
   Ptr<SpectrumChannel> ulSpectrumChannel = lteHelper->GetUplinkSpectrumChannel ();
   //           loss  = txpower -noisepower            -snr    ;
-  double ulMaxLossDb = (phyParams.m_ueTxPower + phyParams.m_ueTxGain)  -
-    (-174.0 + 73.0 + phyParams.m_bsNoiseFigure) -
-    (-15.0);
+  double ulMaxLossDb = (phyParams.m_ueTxPower + phyParams.m_ueTxGain) -
+                       (-174.0 + 73.0 + phyParams.m_bsNoiseFigure) - (-15.0);
   ulSpectrumChannel->SetAttribute ("MaxLossDb", DoubleValue (ulMaxLossDb));
 
   // determine the LTE Almost Blank Subframe (ABS) pattern that will implement the desired duty cycle
@@ -2580,10 +2817,9 @@ ConfigureAndRunScenario (Config_e cellConfigA,
   double actualLteDutyCycle = regularSubframes / 40.0;
   if (cellConfigA == LTE || cellConfigB == LTE)
     {
-      std::cout << "LTE duty cycle: requested " << lteDutyCycle << ", actual " << actualLteDutyCycle << ", ABS pattern " << absPattern << std::endl;
+      std::cout << "LTE duty cycle: requested " << lteDutyCycle << ", actual " << actualLteDutyCycle
+                << ", ABS pattern " << absPattern << std::endl;
     }
-
-
 
   // LTE requires some Internet stack configuration prior to device installation
   // Wifi configures it after device installation
@@ -2593,7 +2829,6 @@ ConfigureAndRunScenario (Config_e cellConfigA,
   internetStackHelper.Install (clientNodesB);
   internetStackHelper.Install (ueNodesA);
   internetStackHelper.Install (ueNodesB);
-
 
   // Laa node configuration and installation.
 
@@ -2621,7 +2856,9 @@ ConfigureAndRunScenario (Config_e cellConfigA,
       NodeContainer laaUeNodes;
       NodeContainer laaClientNodes;
       NetDeviceContainer laaUeDevices;
-      ConfigureLaa (lteHelper, epcHelper, internetIpv4Helper, laaNode, laaUeNodes, laaClientNodes, laaDevice, laaUeDevices, phyParams, lteDlSinrCatcherVectorA, absPattern, transport, lbtChannelAccessManagerInstallTime);
+      ConfigureLaa (lteHelper, epcHelper, internetIpv4Helper, laaNode, laaUeNodes, laaClientNodes,
+                    laaDevice, laaUeDevices, phyParams, lteDlSinrCatcherVectorA, absPattern,
+                    transport, lbtChannelAccessManagerInstallTime);
     }
 
   //
@@ -2638,7 +2875,8 @@ ConfigureAndRunScenario (Config_e cellConfigA,
       internetStackHelper.Install (bsNodesA);
       Ptr<SpectrumChannel> spectrumChannel = lteHelper->GetDownlinkSpectrumChannel ();
       bsDevicesA.Add (ConfigureWifiAp (bsNodesA, phyParams, spectrumChannel, Ssid ("ns380211n-A")));
-      ueDevicesA.Add (ConfigureWifiSta (ueNodesA, phyParams, spectrumChannel, Ssid ("ns380211n-A")));
+      ueDevicesA.Add (
+          ConfigureWifiSta (ueNodesA, phyParams, spectrumChannel, Ssid ("ns380211n-A")));
       Ipv4AddressHelper ipv4h;
       ipv4h.SetBase ("11.0.0.0", "255.255.0.0");
       // Add backhaul CSMA link from client to each BS
@@ -2660,7 +2898,9 @@ ConfigureAndRunScenario (Config_e cellConfigA,
       lteHelper->SetUeDeviceAttribute ("CsgId", UintegerValue (1));
       Ipv4AddressHelper internetIpv4Helper;
       internetIpv4Helper.SetBase ("1.0.0.0", "255.0.0.0");
-      ConfigureLte (lteHelper, epcHelper, internetIpv4Helper, bsNodesA, ueNodesA, clientNodesA, bsDevicesA, ueDevicesA, phyParams, lteDlSinrCatcherVectorA, absPattern, transport);
+      ConfigureLte (lteHelper, epcHelper, internetIpv4Helper, bsNodesA, ueNodesA, clientNodesA,
+                    bsDevicesA, ueDevicesA, phyParams, lteDlSinrCatcherVectorA, absPattern,
+                    transport);
       // source address for IP-based packets will
 
       //Ptr<SpectrumChannel> spectrumChannel = lteHelper->GetDownlinkSpectrumChannel ();
@@ -2676,7 +2916,9 @@ ConfigureAndRunScenario (Config_e cellConfigA,
       lteHelper->SetUeDeviceAttribute ("CsgId", UintegerValue (1));
       Ipv4AddressHelper internetIpv4Helper;
       internetIpv4Helper.SetBase ("1.0.0.0", "255.0.0.0");
-      ConfigureLaa (lteHelper, epcHelper, internetIpv4Helper, bsNodesA, ueNodesA, clientNodesA, bsDevicesA, ueDevicesA, phyParams, lteDlSinrCatcherVectorA, absPattern, transport, lbtChannelAccessManagerInstallTime);
+      ConfigureLaa (lteHelper, epcHelper, internetIpv4Helper, bsNodesA, ueNodesA, clientNodesA,
+                    bsDevicesA, ueDevicesA, phyParams, lteDlSinrCatcherVectorA, absPattern,
+                    transport, lbtChannelAccessManagerInstallTime);
 
       GlobalValue::GetValueByName ("logCwChanges", booleanValue);
       if (booleanValue.Get ())
@@ -2692,7 +2934,8 @@ ConfigureAndRunScenario (Config_e cellConfigA,
       GlobalValue::GetValueByName ("logBackoffChanges", booleanValue);
       if (booleanValue.Get ())
         {
-          NS_ASSERT_MSG (bsDevicesA.GetN () > 0, "Backoff statistics cannot be configured, no device.");
+          NS_ASSERT_MSG (bsDevicesA.GetN () > 0,
+                         "Backoff statistics cannot be configured, no device.");
           for (uint32_t i = 0; i < bsDevicesA.GetN (); i++)
             {
               Ptr<NetDevice> netDevice = bsDevicesA.Get (i);
@@ -2704,19 +2947,21 @@ ConfigureAndRunScenario (Config_e cellConfigA,
       GlobalValue::GetValueByName ("logHarqFeedback", booleanValue);
       if (booleanValue.Get ())
         {
-          NS_ASSERT_MSG (bsDevicesA.GetN () > 0, "Harq feedback statistics cannot be configured, no device.");
+          NS_ASSERT_MSG (bsDevicesA.GetN () > 0,
+                         "Harq feedback statistics cannot be configured, no device.");
           for (uint32_t i = 0; i < bsDevicesA.GetN (); i++)
             {
               Ptr<NetDevice> netDevice = bsDevicesA.Get (i);
               Simulator::Schedule (clientStartTime, &HarqFeedbackConnect, netDevice);
               //Simulator::Schedule (clientStopTime, &HarqFeedbackDisconnect, netDevice);
             }
-       }
+        }
 
       GlobalValue::GetValueByName ("logReservationSignals", booleanValue);
       if (booleanValue.Get ())
         {
-          NS_ASSERT_MSG (bsDevicesA.GetN () > 0, "Reservation signals statistics cannot be configured, no device.");
+          NS_ASSERT_MSG (bsDevicesA.GetN () > 0,
+                         "Reservation signals statistics cannot be configured, no device.");
           for (uint32_t i = 0; i < bsDevicesA.GetN (); i++)
             {
               Ptr<NetDevice> netDevice = bsDevicesA.Get (i);
@@ -2724,7 +2969,6 @@ ConfigureAndRunScenario (Config_e cellConfigA,
               Simulator::Schedule (clientStopTime, &ReservationSignalTraceDisconnect, netDevice);
             }
         }
-
     }
 
   //
@@ -2737,7 +2981,9 @@ ConfigureAndRunScenario (Config_e cellConfigA,
       internetStackHelper.Install (bsNodesB);
       Ptr<SpectrumChannel> spectrumChannel = lteHelper->GetDownlinkSpectrumChannel ();
       bsDevicesB.Add (ConfigureWifiAp (bsNodesB, phyParams, spectrumChannel, Ssid ("ns380211n-B")));
-      ueDevicesB.Add (ConfigureWifiSta (ueNodesB, phyParams, spectrumChannel, Ssid ("ns380211n-B")));
+
+      ueDevicesB.Add (
+          ConfigureWifiSta (ueNodesB, phyParams, spectrumChannel, Ssid ("ns380211n-B")));
 
       Ipv4AddressHelper ipv4h;
       ipv4h.SetBase ("12.0.0.0", "255.255.0.0");
@@ -2760,7 +3006,9 @@ ConfigureAndRunScenario (Config_e cellConfigA,
       lteHelper->SetUeDeviceAttribute ("CsgId", UintegerValue (2));
       Ipv4AddressHelper internetIpv4Helper;
       internetIpv4Helper.SetBase ("2.0.0.0", "255.0.0.0");
-      ConfigureLte (lteHelper, epcHelper,  internetIpv4Helper, bsNodesB, ueNodesB, clientNodesB, bsDevicesB, ueDevicesB, phyParams, lteDlSinrCatcherVectorB, absPattern, transport);
+      ConfigureLte (lteHelper, epcHelper, internetIpv4Helper, bsNodesB, ueNodesB, clientNodesB,
+                    bsDevicesB, ueDevicesB, phyParams, lteDlSinrCatcherVectorB, absPattern,
+                    transport);
       // The IP address for the backhaul traffic source will be 2.0.0.2
       ipBackhaulB = Ipv4Address ("2.0.0.2");
     }
@@ -2772,7 +3020,9 @@ ConfigureAndRunScenario (Config_e cellConfigA,
       lteHelper->SetUeDeviceAttribute ("CsgId", UintegerValue (2));
       Ipv4AddressHelper internetIpv4Helper;
       internetIpv4Helper.SetBase ("2.0.0.0", "255.0.0.0");
-      ConfigureLaa (lteHelper, epcHelper,  internetIpv4Helper, bsNodesB, ueNodesB, clientNodesB, bsDevicesB, ueDevicesB, phyParams, lteDlSinrCatcherVectorB, absPattern, transport, lbtChannelAccessManagerInstallTime);
+      ConfigureLaa (lteHelper, epcHelper, internetIpv4Helper, bsNodesB, ueNodesB, clientNodesB,
+                    bsDevicesB, ueDevicesB, phyParams, lteDlSinrCatcherVectorB, absPattern,
+                    transport, lbtChannelAccessManagerInstallTime);
       // The IP address for the backhaul traffic source will be 2.0.0.2
       ipBackhaulB = Ipv4Address ("2.0.0.2");
 
@@ -2790,7 +3040,8 @@ ConfigureAndRunScenario (Config_e cellConfigA,
       GlobalValue::GetValueByName ("logBackoffChanges", booleanValue);
       if (booleanValue.Get ())
         {
-          NS_ASSERT_MSG (bsDevicesB.GetN () > 0, "Backoff statistics cannot be configured, no device.");
+          NS_ASSERT_MSG (bsDevicesB.GetN () > 0,
+                         "Backoff statistics cannot be configured, no device.");
           for (uint32_t i = 0; i < bsDevicesB.GetN (); i++)
             {
               Ptr<NetDevice> netDevice = bsDevicesB.Get (i);
@@ -2801,7 +3052,8 @@ ConfigureAndRunScenario (Config_e cellConfigA,
       GlobalValue::GetValueByName ("logHarqFeedback", booleanValue);
       if (booleanValue.Get ())
         {
-          NS_ASSERT_MSG (bsDevicesB.GetN () > 0, "Harq feedback statistics cannot be configured, no device.");
+          NS_ASSERT_MSG (bsDevicesB.GetN () > 0,
+                         "Harq feedback statistics cannot be configured, no device.");
           for (uint32_t i = 0; i < bsDevicesB.GetN (); i++)
             {
               Ptr<NetDevice> netDevice = bsDevicesB.Get (i);
@@ -2812,7 +3064,8 @@ ConfigureAndRunScenario (Config_e cellConfigA,
       GlobalValue::GetValueByName ("logReservationSignals", booleanValue);
       if (booleanValue.Get ())
         {
-          NS_ASSERT_MSG (bsDevicesB.GetN () > 0, "Reservation signals statistics cannot be configured, no device.");
+          NS_ASSERT_MSG (bsDevicesB.GetN () > 0,
+                         "Reservation signals statistics cannot be configured, no device.");
           for (uint32_t i = 0; i < bsDevicesB.GetN (); i++)
             {
               Ptr<NetDevice> netDevice = bsDevicesB.Get (i);
@@ -2820,10 +3073,7 @@ ConfigureAndRunScenario (Config_e cellConfigA,
               Simulator::Schedule (clientStopTime, &ReservationSignalTraceDisconnect, netDevice);
             }
         }
-
-
     }
-
 
   //
   // IP addressing setup phase
@@ -2838,6 +3088,7 @@ ConfigureAndRunScenario (Config_e cellConfigA,
   ueAddress.SetBase ("17.0.0.0", "255.255.0.0");
   ipBsA = ueAddress.Assign (bsDevicesA);
   ipUeA = ueAddress.Assign (ueDevicesA);
+  
 
   ueAddress.SetBase ("18.0.0.0", "255.255.0.0");
   ipBsB = ueAddress.Assign (bsDevicesB);
@@ -2848,10 +3099,12 @@ ConfigureAndRunScenario (Config_e cellConfigA,
     {
       // WiFi nodes will trigger an association callback, which can invoke
       // a method to configure the appropriate routes on client and STA
-      Config::Connect ("/NodeList/*/DeviceList/*/Mac/Assoc", MakeCallback (&ConfigureRouteForStation));
+      Config::Connect ("/NodeList/*/DeviceList/*/Mac/Assoc",
+                       MakeCallback (&ConfigureRouteForStation));
       // Deassociation logging
-      Config::Connect ("/NodeList/*/DeviceList/*/Mac/DeAssoc", MakeCallback (&DeassociationLogging));
-  }
+      Config::Connect ("/NodeList/*/DeviceList/*/Mac/DeAssoc",
+                       MakeCallback (&DeassociationLogging));
+    }
 
   //
   // Application setup phase
@@ -2884,6 +3137,7 @@ ConfigureAndRunScenario (Config_e cellConfigA,
       found = GlobalValue::GetValueByNameFailSafe ("voiceEnabled", booleanValue);
       if (found && (booleanValue.Get ()) && (ueNodesB.GetN () >= 4))
         {
+          std::cout << "Voice enabled" << std::endl;
           // Skip the 0th and 1st indices; they will be used for voice
           for (uint32_t index = 2; index < ueNodesB.GetN (); index++)
             {
@@ -2906,9 +3160,14 @@ ConfigureAndRunScenario (Config_e cellConfigA,
         {
           ApplicationContainer serverApps, clientApps;
           serverApps.Add (ConfigureUdpServers (ueNodesA, serverStartTime, serverStopTime));
-          clientApps.Add (ConfigureUdpClients (clientNodesA, ipUeA, clientStartTime, clientStopTime, udpInterval));
+          clientApps.Add (ConfigureUdpClients (clientNodesA, ipUeA, clientStartTime, clientStopTime,
+                                               udpInterval));
           serverApps.Add (ConfigureUdpServers (nonVoiceUeNodesB, serverStartTime, serverStopTime));
-          clientApps.Add (ConfigureUdpClients (clientNodesB, nonVoiceIpUeB, clientStartTime, clientStopTime, udpInterval));
+          clientApps.Add (ConfigureUdpClients (clientNodesB, nonVoiceIpUeB, clientStartTime,
+                                               clientStopTime, udpInterval));
+          // serverApps.Add (ConfigureUdpServers (nonVoiceUeNodesB, Seconds (2.4), serverStopTime));
+          // clientApps.Add (ConfigureUdpClients (clientNodesB, nonVoiceIpUeB, Seconds (2.4),
+          //                                      clientStopTime, udpInterval));
         }
       else if (transport == FTP)
         {
@@ -2917,14 +3176,18 @@ ConfigureAndRunScenario (Config_e cellConfigA,
           ftpClientApps.Add (ConfigureFtpClients (clientNodesA, ipUeA, clientStartTime));
           // Start file transfer arrival process in both networks
           double firstArrivalA = ftpArrivalsA->GetValue ();
-          NS_LOG_DEBUG ("First FTP arrival for operator A at time " << clientStartTime.GetSeconds () + firstArrivalA);
-          Simulator::Schedule (clientStartTime + Seconds (firstArrivalA), &StartFileTransfer, ftpArrivalsA, ftpClientApps, nextClient, clientStopTime);
+          NS_LOG_DEBUG ("First FTP arrival for operator A at time "
+                        << clientStartTime.GetSeconds () + firstArrivalA);
+          Simulator::Schedule (clientStartTime + Seconds (firstArrivalA), &StartFileTransfer,
+                               ftpArrivalsA, ftpClientApps, nextClient, clientStopTime);
           ApplicationContainer ftpServerAppsB, ftpClientAppsB;
           ftpServerAppsB.Add (ConfigureFtpServers (nonVoiceUeNodesB, serverStartTime));
           ftpClientAppsB.Add (ConfigureFtpClients (clientNodesB, nonVoiceIpUeB, clientStartTime));
           double firstArrivalB = ftpArrivalsB->GetValue ();
-          NS_LOG_DEBUG ("First FTP arrival for operator B at time " << clientStartTime.GetSeconds () + firstArrivalB);
-          Simulator::Schedule (clientStartTime + Seconds (firstArrivalB), &StartFileTransfer, ftpArrivalsB, ftpClientAppsB, nextClient, clientStopTime);
+          NS_LOG_DEBUG ("First FTP arrival for operator B at time "
+                        << clientStartTime.GetSeconds () + firstArrivalB);
+          Simulator::Schedule (clientStartTime + Seconds (firstArrivalB), &StartFileTransfer,
+                               ftpArrivalsB, ftpClientAppsB, nextClient, clientStopTime);
         }
       else
         {
@@ -2933,14 +3196,18 @@ ConfigureAndRunScenario (Config_e cellConfigA,
           tcpClientApps.Add (ConfigureTcpClients (clientNodesA, ipUeA, clientStartTime));
           // Start file transfer arrival process
           double firstArrivalA = ftpArrivalsA->GetValue ();
-          NS_LOG_DEBUG ("First FTP arrival for operator A at time " << clientStartTime.GetSeconds () + firstArrivalA);
-          Simulator::Schedule (clientStartTime + Seconds (firstArrivalA), &StartFileTransfer, ftpArrivalsA, tcpClientApps, nextClient, clientStopTime);
+          NS_LOG_DEBUG ("First FTP arrival for operator A at time "
+                        << clientStartTime.GetSeconds () + firstArrivalA);
+          Simulator::Schedule (clientStartTime + Seconds (firstArrivalA), &StartFileTransfer,
+                               ftpArrivalsA, tcpClientApps, nextClient, clientStopTime);
           ApplicationContainer tcpServerAppsB, tcpClientAppsB;
           tcpServerAppsB.Add (ConfigureTcpServers (nonVoiceUeNodesB, serverStartTime));
           tcpClientAppsB.Add (ConfigureTcpClients (clientNodesB, nonVoiceIpUeB, clientStartTime));
           double firstArrivalB = ftpArrivalsB->GetValue ();
-          NS_LOG_DEBUG ("First FTP arrival for operator B at time " << clientStartTime.GetSeconds () + firstArrivalB);
-          Simulator::Schedule (clientStartTime + Seconds (firstArrivalB), &StartFileTransfer, ftpArrivalsB, tcpClientAppsB, nextClient, clientStopTime);
+          NS_LOG_DEBUG ("First FTP arrival for operator B at time "
+                        << clientStartTime.GetSeconds () + firstArrivalB);
+          Simulator::Schedule (clientStartTime + Seconds (firstArrivalB), &StartFileTransfer,
+                               ftpArrivalsB, tcpClientAppsB, nextClient, clientStopTime);
         }
       found = GlobalValue::GetValueByNameFailSafe ("voiceEnabled", booleanValue);
       if (found && (booleanValue.Get ()))
@@ -2978,7 +3245,7 @@ ConfigureAndRunScenario (Config_e cellConfigA,
           voiceAppReceiver0->SetAttribute ("SendEnabled", BooleanValue (false));
           voiceReceiver0->AddApplication (voiceAppReceiver0);
           context = NodeIdToContext (voiceReceiver0->GetId ());
-          success = voiceAppReceiver0->TraceConnect("Rx", context, MakeCallback(&VoiceRxCb));
+          success = voiceAppReceiver0->TraceConnect ("Rx", context, MakeCallback (&VoiceRxCb));
           NS_ASSERT (success);
 
           if (ueNodesB.GetN () > 1)
@@ -2994,7 +3261,7 @@ ConfigureAndRunScenario (Config_e cellConfigA,
               voiceAppReceiver1->SetAttribute ("SendEnabled", BooleanValue (false));
               voiceReceiver1->AddApplication (voiceAppReceiver1);
               context = NodeIdToContext (voiceReceiver1->GetId ());
-              success = voiceAppReceiver1->TraceConnect("Rx", context, MakeCallback(&VoiceRxCb));
+              success = voiceAppReceiver1->TraceConnect ("Rx", context, MakeCallback (&VoiceRxCb));
               NS_ASSERT (success);
             }
           else
@@ -3005,21 +3272,25 @@ ConfigureAndRunScenario (Config_e cellConfigA,
 
           // Configure the local address for each receiver (i.e. bind() to
           // the voice port) via the 'Local' attribute
-          voiceAppReceiver0->SetAttribute ("Local", AddressValue (InetSocketAddress (Ipv4Address::GetAny (), VOICE_PORT)));
+          voiceAppReceiver0->SetAttribute (
+              "Local", AddressValue (InetSocketAddress (Ipv4Address::GetAny (), VOICE_PORT)));
           if (voiceAppReceiver1)
             {
-              voiceAppReceiver1->SetAttribute ("Local", AddressValue (InetSocketAddress (Ipv4Address::GetAny (), VOICE_PORT)));
+              voiceAppReceiver1->SetAttribute (
+                  "Local", AddressValue (InetSocketAddress (Ipv4Address::GetAny (), VOICE_PORT)));
             }
 
           // Configure the peer address for sender via the 'Remote' attribute
           remoteIp0 = ipUeB.GetAddress (0, 0);
           NS_LOG_DEBUG ("IP 0 " << remoteIp0);
-          voiceAppSender0->SetAttribute ("Remote", AddressValue (InetSocketAddress (remoteIp0, VOICE_PORT)));
+          voiceAppSender0->SetAttribute ("Remote",
+                                         AddressValue (InetSocketAddress (remoteIp0, VOICE_PORT)));
           if (voiceAppSender1)
             {
               remoteIp1 = ipUeB.GetAddress (1, 0);
               NS_LOG_DEBUG ("IP 1 " << remoteIp1);
-              voiceAppSender1->SetAttribute ("Remote", AddressValue (InetSocketAddress (remoteIp1, VOICE_PORT)));
+              voiceAppSender1->SetAttribute (
+                  "Remote", AddressValue (InetSocketAddress (remoteIp1, VOICE_PORT)));
             }
         }
     }
@@ -3053,7 +3324,6 @@ ConfigureAndRunScenario (Config_e cellConfigA,
   endpointNodesB.Add (clientNodesB);
   endpointNodesB.Add (ueNodesB);
 
-
   Ptr<FlowMonitor> monitorA = flowmonHelperA.Install (endpointNodesA);
   monitorA->SetAttribute ("DelayBinWidth", DoubleValue (0.001));
   monitorA->SetAttribute ("JitterBinWidth", DoubleValue (0.001));
@@ -3064,9 +3334,8 @@ ConfigureAndRunScenario (Config_e cellConfigA,
   monitorB->SetAttribute ("JitterBinWidth", DoubleValue (0.001));
   monitorB->SetAttribute ("PacketSizeBinWidth", DoubleValue (20));
 
-
   // these slow down simulations, only enable them if you need them
-  //lteHelper->EnableTraces();
+  lteHelper->EnableTraces ();
 
   Ptr<RadioEnvironmentMapHelper> remHelper;
   if (generateRem)
@@ -3075,15 +3344,27 @@ ConfigureAndRunScenario (Config_e cellConfigA,
       GlobalValue::GetValueByName ("remDir", stringValue);
       std::string remDir = stringValue.Get ();
 
-      PrintGnuplottableNodeListToFile (remDir + "/bs_A_labels.gnuplot", bsNodesA, true, "A_BS_", " center textcolor rgb \"cyan\" front point pt 5 lc rgb \"cyan\" offset 0,0.5");
-      PrintGnuplottableNodeListToFile (remDir + "/ue_A_labels.gnuplot", ueNodesA, true, "A_UE_", " center textcolor rgb \"cyan\" front point pt 4 lc rgb \"cyan\" offset 0,0.5");
-      PrintGnuplottableNodeListToFile (remDir + "/bs_B_labels.gnuplot", bsNodesB, true, "B_BS_", " center textcolor rgb \"chartreuse\" front point pt 7 lc rgb \"chartreuse\" offset 0,0.5");
-      PrintGnuplottableNodeListToFile (remDir + "/ue_B_labels.gnuplot", ueNodesB, true, "B_UE_", " center textcolor rgb \"chartreuse\" front point pt 6 lc rgb \"chartreuse\" offset 0,0.5");
+      PrintGnuplottableNodeListToFile (
+          remDir + "/bs_A_labels.gnuplot", bsNodesA, true, "A_BS_",
+          " center textcolor rgb \"cyan\" front point pt 5 lc rgb \"cyan\" offset 0,0.5");
+      PrintGnuplottableNodeListToFile (
+          remDir + "/ue_A_labels.gnuplot", ueNodesA, true, "A_UE_",
+          " center textcolor rgb \"cyan\" front point pt 4 lc rgb \"cyan\" offset 0,0.5");
+      PrintGnuplottableNodeListToFile (remDir + "/bs_B_labels.gnuplot", bsNodesB, true, "B_BS_",
+                                       " center textcolor rgb \"chartreuse\" front point pt 7 lc "
+                                       "rgb \"chartreuse\" offset 0,0.5");
+      PrintGnuplottableNodeListToFile (remDir + "/ue_B_labels.gnuplot", ueNodesB, true, "B_UE_",
+                                       " center textcolor rgb \"chartreuse\" front point pt 6 lc "
+                                       "rgb \"chartreuse\" offset 0,0.5");
 
-      PrintGnuplottableNodeListToFile (remDir + "/bs_A.gnuplot", bsNodesA, false, "", " point pt 5 lc rgb \"cyan\" front ");
-      PrintGnuplottableNodeListToFile (remDir + "/ue_A.gnuplot", ueNodesA, false, "", " point pt 4 lc rgb \"cyan\" front ");
-      PrintGnuplottableNodeListToFile (remDir + "/bs_B.gnuplot", bsNodesB, false, "", " point pt 7 lc rgb \"chartreuse\" front ");
-      PrintGnuplottableNodeListToFile (remDir + "/ue_B.gnuplot", ueNodesB, false, "", " point pt 6 lc rgb \"chartreuse\" front ");
+      PrintGnuplottableNodeListToFile (remDir + "/bs_A.gnuplot", bsNodesA, false, "",
+                                       " point pt 5 lc rgb \"cyan\" front ");
+      PrintGnuplottableNodeListToFile (remDir + "/ue_A.gnuplot", ueNodesA, false, "",
+                                       " point pt 4 lc rgb \"cyan\" front ");
+      PrintGnuplottableNodeListToFile (remDir + "/bs_B.gnuplot", bsNodesB, false, "",
+                                       " point pt 7 lc rgb \"chartreuse\" front ");
+      PrintGnuplottableNodeListToFile (remDir + "/ue_B.gnuplot", ueNodesB, false, "",
+                                       " point pt 6 lc rgb \"chartreuse\" front ");
 
       remHelper = CreateObject<RadioEnvironmentMapHelper> ();
       remHelper->SetAttribute ("ChannelPath", StringValue ("/ChannelList/0"));
@@ -3129,7 +3410,7 @@ ConfigureAndRunScenario (Config_e cellConfigA,
   if ((lteUsed || laaUsed) && booleanValue.Get ())
     {
       Simulator::Schedule (clientStartTime, &ScheduleDataTxConnect);
-     // Simulator::Schedule (clientStopTime, &ScheduleDataTxDisconnect);
+      // Simulator::Schedule (clientStopTime, &ScheduleDataTxDisconnect);
     }
 
   GlobalValue::GetValueByName ("logBeaconArrivals", booleanValue);
@@ -3162,7 +3443,20 @@ ConfigureAndRunScenario (Config_e cellConfigA,
   //
   // Running the simulation
   //
+
+  AnimationInterface anim ("animation.xml");
+  anim.EnablePacketMetadata (true);
+
+  //for()
+  //Simulator::Schedule (interval_simulation, &handleScheduledEvent, simulationParams, monitorA, 4.0 );
+  // Simulator::Schedule (Seconds (2.0), &SaveUdpFlowMonitorStats, outFileName + "_operatorA" + "at 2",
+  //                      simulationParams, monitorA, NULL, durationTime.GetSeconds ());
+
   Simulator::Run ();
+
+
+  monitorA->SerializeToXmlFile("LTE.xml", true, true);
+  //Simulator::Schedule (Seconds (2.0), &SaveUdpFlowMonitorStats, outFileName + "_operatorA"+"at 2", simulationParams, monitorA, flowmonHelperA, durationTime.GetSeconds() );
 
   //
   // Post-processing phase
@@ -3183,14 +3477,17 @@ ConfigureAndRunScenario (Config_e cellConfigA,
               txopDurationCounterB += txopLog.m_duration;
             }
         }
-      std::cout << "Total airtime duration cell A: " << txopDurationCounterA.GetSeconds () << " seconds." << std::endl;
-      std::cout << "Total airtime duration cell B: " << txopDurationCounterB.GetSeconds () << " seconds." << std::endl;
+      std::cout << "Total airtime duration cell A: " << txopDurationCounterA.GetSeconds ()
+                << " seconds." << std::endl;
+      std::cout << "Total airtime duration cell B: " << txopDurationCounterB.GetSeconds ()
+                << " seconds." << std::endl;
       std::cout << "Total airtime duration: " << g_txopDurationCounter << " seconds." << std::endl;
     }
   GlobalValue::GetValueByName ("logPhyArrivals", booleanValue);
   if (booleanValue.Get ())
     {
-      std::cout<<"Total phy arrivals duration: "<<g_arrivalsDurationCounter<<" seconds." << std::endl;
+      std::cout << "Total phy arrivals duration: " << g_arrivalsDurationCounter << " seconds."
+                << std::endl;
     }
   std::cout << "--------monitorA----------" << std::endl;
   PrintFlowMonitorStats (monitorA, flowmonHelperA, durationTime.GetSeconds ());
@@ -3199,13 +3496,20 @@ ConfigureAndRunScenario (Config_e cellConfigA,
 
   if (transport == TCP)
     {
-      SaveTcpFlowMonitorStats (outFileName + "_operatorA", simulationParams, monitorA, flowmonHelperA, durationTime.GetSeconds ());
-      SaveTcpFlowMonitorStats (outFileName + "_operatorB", simulationParams, monitorB, flowmonHelperB, durationTime.GetSeconds ());
+      SaveTcpFlowMonitorStats (outFileName + "_operatorA", simulationParams, monitorA,
+                               flowmonHelperA, durationTime.GetSeconds ());
+      SaveTcpFlowMonitorStats (outFileName + "_operatorB", simulationParams, monitorB,
+                               flowmonHelperB, durationTime.GetSeconds ());
     }
   else if (transport == UDP || transport == FTP)
     {
-      SaveUdpFlowMonitorStats (outFileName + "_operatorA", simulationParams, monitorA, flowmonHelperA, durationTime.GetSeconds ());
-      SaveUdpFlowMonitorStats (outFileName + "_operatorB", simulationParams, monitorB, flowmonHelperB, durationTime.GetSeconds ());
+      SaveUdpFlowMonitorStats (outFileName + "_operatorA", simulationParams, monitorA,
+                               flowmonHelperA, durationTime.GetSeconds ());
+
+      //Rashed Mod
+
+      SaveUdpFlowMonitorStats (outFileName + "_operatorB", simulationParams, monitorB,
+                               flowmonHelperB, durationTime.GetSeconds ());
     }
   else
     {
@@ -3215,15 +3519,15 @@ ConfigureAndRunScenario (Config_e cellConfigA,
   NodeContainer bsNodesForLogs;
   NodeContainer ueNodesForLogs;
 
-  if(cellConfigA == LAA || cellConfigA == LTE)
+  if (cellConfigA == LAA || cellConfigA == LTE)
     {
-      bsNodesForLogs.Add(bsNodesA);
-      ueNodesForLogs.Add(ueNodesA);
+      bsNodesForLogs.Add (bsNodesA);
+      ueNodesForLogs.Add (ueNodesA);
     }
   if (cellConfigB == LAA || cellConfigA == LTE)
     {
-      bsNodesForLogs.Add(bsNodesB);
-      ueNodesForLogs.Add(ueNodesB);
+      bsNodesForLogs.Add (bsNodesB);
+      ueNodesForLogs.Add (ueNodesB);
     }
 
   GlobalValue::GetValueByName ("logPhyArrivals", booleanValue);
@@ -3287,12 +3591,13 @@ ConfigureAndRunScenario (Config_e cellConfigA,
   GlobalValue::GetValueByName ("logCtrlSignals", booleanValue);
   if (booleanValue.Get ())
     {
-        SaveCtrlSigStats (outFileName + "_ctrlSignal_log", g_ctrlSignalLog);
+      SaveCtrlSigStats (outFileName + "_ctrlSignal_log", g_ctrlSignalLog);
     }
   GlobalValue::GetValueByName ("logAssociationStats", booleanValue);
   if (booleanValue.Get ())
     {
-      SaveAssociationStats (outFileName + "_association_log", g_associations, bsNodesForLogs, ueNodesForLogs);
+      SaveAssociationStats (outFileName + "_association_log", g_associations, bsNodesForLogs,
+                            ueNodesForLogs);
     }
 
   Simulator::Destroy ();
