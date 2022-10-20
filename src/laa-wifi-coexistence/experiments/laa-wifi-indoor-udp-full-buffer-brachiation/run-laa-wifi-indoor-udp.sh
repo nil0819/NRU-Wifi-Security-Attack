@@ -83,10 +83,10 @@ laaTxMode=2
 #    done
 #done
 
-for udpRate in 155Mbps ; do
+for udpRate in 155Mbps 165Mbps 175Mbps 185Mbps 195Mbps 205Mbps 215Mbps 225Mbps 235Mbps 245Mbps 255Mbps 265Mbps 275Mbps 285Mbps 295Mbps; do
 	for energyDetection in -72.0  ; do
 		 for cell in Laa ; do
-		 	for RngRun in 12 13 14 15 16 17 18 19 20 21; do
+		 	for RngRun in 10; do
 		 		 duration=$base_duration
 		 		 simTag="eD_${energyDetection}_udpRate_${udpRate}_cellA_${cell}"
 		 		 /usr/bin/time -f '%e %U %S %K %M %x %C' -o "${outputDir}"/time_stats -a \

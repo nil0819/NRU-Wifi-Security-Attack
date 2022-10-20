@@ -3165,8 +3165,8 @@ ConfigureAndRunScenario (Config_e cellConfigA, Config_e cellConfigB, NodeContain
           serverApps.Add (ConfigureUdpServers (nonVoiceUeNodesB, serverStartTime, serverStopTime));
           clientApps.Add (ConfigureUdpClients (clientNodesB, nonVoiceIpUeB, clientStartTime,
                                                clientStopTime, udpInterval));
-          // serverApps.Add (ConfigureUdpServers (nonVoiceUeNodesB, Seconds (2.4), serverStopTime));
-          // clientApps.Add (ConfigureUdpClients (clientNodesB, nonVoiceIpUeB, Seconds (2.4),
+          // serverApps.Add (ConfigureUdpServers (nonVoiceUeNodesB, Seconds (12.4), serverStopTime));
+          // clientApps.Add (ConfigureUdpClients (clientNodesB, nonVoiceIpUeB, Seconds (12.4),
           //                                      clientStopTime, udpInterval));
         }
       else if (transport == FTP)
