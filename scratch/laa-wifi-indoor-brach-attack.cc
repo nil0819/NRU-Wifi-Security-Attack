@@ -384,7 +384,7 @@ main (int argc, char *argv[])
   mobilityBs.Install (bsNodesA);
 
   Ptr<ListPositionAllocator> initialAlloc_wifibs = CreateObject<ListPositionAllocator> ();
-  initialAlloc_wifibs->Add (Vector (94, 28, 0));
+  initialAlloc_wifibs->Add (Vector (31, 28, 0));
   mobilityBs_Mobile_Wifi.SetPositionAllocator (initialAlloc_wifibs);
   mobilityBs_Mobile_Wifi.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   mobilityBs_Mobile_Wifi.Install (bsNodesB);
@@ -504,9 +504,9 @@ main (int argc, char *argv[])
   Ptr<ListPositionAllocator> wifi_initialAlloc =
     CreateObject<ListPositionAllocator> ();
 
-    wifi_initialAlloc->Add (Vector(98, 24, 0));
-    wifi_initialAlloc->Add (Vector(98, 32, 0));
-    wifi_initialAlloc->Add (Vector(90, 28, 0));
+    wifi_initialAlloc->Add (Vector(30, 24, 0));
+    wifi_initialAlloc->Add (Vector(30, 32, 0));
+    wifi_initialAlloc->Add (Vector(30, 28, 0));
     // wifi_initialAlloc->Add (Vector(92, 28, 0));
   //   wifi_initialAlloc->Add (Vector(80,16,0));
   //   wifi_initialAlloc->Add (Vector(0,56,0));
