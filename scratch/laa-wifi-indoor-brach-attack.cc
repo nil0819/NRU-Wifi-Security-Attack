@@ -360,15 +360,6 @@ main (int argc, char *argv[])
   Ptr<RandomRectanglePositionAllocator> bs_allocator =
       CreateObject<RandomRectanglePositionAllocator> ();
 
-  // Ptr<UniformRandomVariable> bs_xPos = CreateObject<UniformRandomVariable> ();
-  // bs_xPos->SetAttribute ("Min", DoubleValue (16));
-  // bs_xPos->SetAttribute ("Max", DoubleValue (72));
-  // bs_allocator->SetX (bs_xPos);
-
-  // Ptr<UniformRandomVariable> bs_yPos = CreateObject<UniformRandomVariable> ();
-  // bs_yPos->SetAttribute ("Min", DoubleValue (0));
-  // bs_yPos->SetAttribute ("Max", DoubleValue (60));
-  // bs_allocator->SetY (bs_yPos);
   Ptr<ListPositionAllocator> initialAlloc = CreateObject<ListPositionAllocator> ();
 
   initialAlloc->Add (Vector (32, 28, 0));
@@ -384,87 +375,11 @@ main (int argc, char *argv[])
   mobilityBs.Install (bsNodesA);
 
   Ptr<ListPositionAllocator> initialAlloc_wifibs = CreateObject<ListPositionAllocator> ();
-  initialAlloc_wifibs->Add (Vector (31, 28, 0));
+  initialAlloc_wifibs->Add (Vector (95, 28, 0));
   mobilityBs_Mobile_Wifi.SetPositionAllocator (initialAlloc_wifibs);
   mobilityBs_Mobile_Wifi.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   mobilityBs_Mobile_Wifi.Install (bsNodesB);
 
-  // mobilityBs.SetPositionAllocator ("ns3::GridPositionAllocator", "MinX", DoubleValue (318), "MinY",
-  //                                  DoubleValue (544), "DeltaX", DoubleValue (25), "LayoutType",
-  //                                  StringValue ("RowFirst"));
-  //mobilityBs.Install (bsNodesB);
-
-  // mobilityBs_Mobile_Wifi.SetPositionAllocator (
-  //     "ns3::GridPositionAllocator", "MinX", DoubleValue (16), "MinY", DoubleValue (16), "DeltaX",
-  //     DoubleValue (25), "LayoutType", StringValue ("RowFirst"));
-
-  // mobilityBs_Mobile_Wifi.SetMobilityModel ("ns3::RandomWalk2dMobilityModel",
-  //                            "Mode", StringValue ("Time"),
-  //                            "Time", StringValue ("2s"),
-  //                            "Speed", StringValue ("ns3::ConstantRandomVariable[Constant=1.0]"),
-  //                            "Bounds", StringValue ("0|80|0|120"));
-  //mobilityBs_Mobile_Wifi.Install (bsNodesB);
-
-  // if (bsCornerPlacement == false)
-  //   {
-  //     /* Rashed Nov 26 2021
-  //     * This i the BS placement code. Commenting the actual code so that I can change them back
-  //     * I will be adding more deployment scenarios of the APs and BSs. 1X1 2X2 3X3 4X4 5X5 6X6
-  //     */
-
-  //     /* Rashed Nov 26 2021
-  //     * My first case is 1X1. The AP and the BS would be at the center (58,25) and  (62,25)
-  //     */
-  //     // Place operator A's BS at coordinates (60,25)
-  //     mobilityBs.SetPositionAllocator ("ns3::GridPositionAllocator", "MinX", DoubleValue (58),
-  //                                      "MinY", DoubleValue (25), "DeltaX", DoubleValue (15),
-  //                                      "LayoutType", StringValue ("RowFirst"));
-  //     mobilityBs.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  //     mobilityBs.Install (bsNodesA);
-  //     // The offset between the base stations of operators A and B is governed
-  //     // by the global value bsSpacing;
-  //     // Place operator B's BS at coordinates (60 + bsSpacing ,25)
-  //     mobilityBs.SetPositionAllocator (
-  //         "ns3::GridPositionAllocator", "MinX", DoubleValue (58 + bsSpacing), "MinY",
-  //         DoubleValue (25), "DeltaX", DoubleValue (25), "LayoutType", StringValue ("RowFirst"));
-  //     mobilityBs.Install (bsNodesB);
-  //     // // Place operator A's BS at coordinates (20,25), (45,25), (70,25), (95,25)
-  //     // mobilityBs.SetPositionAllocator ("ns3::GridPositionAllocator",
-  //     //                                 "MinX", DoubleValue (20),
-  //     //                                 "MinY", DoubleValue (25),
-  //     //                                 "DeltaX", DoubleValue (25),
-  //     //                                 "LayoutType", StringValue ("RowFirst"));
-  //     // mobilityBs.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  //     // mobilityBs.Install (bsNodesA);
-  //     // // The offset between the base stations of operators A and B is governed
-  //     // // by the global value bsSpacing;
-  //     // // Place operator B's BS at coordinates (20 + bsSpacing ,25), (45,25), (70,25), (95,25)
-  //     // mobilityBs.SetPositionAllocator ("ns3::GridPositionAllocator",
-  //     //                                 "MinX", DoubleValue (20 + bsSpacing),
-  //     //                                 "MinY", DoubleValue (25),
-  //     //                                 "DeltaX", DoubleValue (25),
-  //     //                                 "LayoutType", StringValue ("RowFirst"));
-  //     // mobilityBs.Install (bsNodesB);
-  //   }
-  // else
-  //   {
-  //     // Place BS at the corners (0,0), (120,0), (0,50), (120,50)
-  //     mobilityBs.SetPositionAllocator ("ns3::GridPositionAllocator", "MinX", DoubleValue (0),
-  //                                      "MinY", DoubleValue (0), "GridWidth", UintegerValue (2),
-  //                                      "DeltaX", DoubleValue (120), "DeltaY", DoubleValue (50),
-  //                                      "LayoutType", StringValue ("RowFirst"));
-  //     mobilityBs.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  //     mobilityBs.Install (bsNodesA);
-  //     // place BS at the corners (1,1), (119,1), (1,49), (119,49)
-  //     mobilityBs.SetPositionAllocator ("ns3::GridPositionAllocator", "MinX", DoubleValue (30),
-  //                                      "MinY", DoubleValue (38), "GridWidth", UintegerValue (2),
-  //                                      "DeltaX", DoubleValue (118), "DeltaY", DoubleValue (48),
-  //                                      "LayoutType", StringValue ("RowFirst"));
-  //     mobilityBs.Install (bsNodesB);
-  //   }
-  /*Rashed Nov 29, 2021 
-  */
-  // Allocate UE for each cell
   NodeContainer ueNodesA;
   ueNodesA.Create (12); //numUePerCell * numCells);
   NodeContainer ueNodesB;
@@ -475,82 +390,30 @@ main (int argc, char *argv[])
   // Ptr<RandomRectanglePositionAllocator> allocator =
   //     CreateObject<RandomRectanglePositionAllocator> ();
   Ptr<ListPositionAllocator> lte_initialAlloc = CreateObject<ListPositionAllocator> ();
-  lte_initialAlloc->Add (Vector (32, 24, 0));
-  lte_initialAlloc->Add (Vector (32, 32, 0));
-  lte_initialAlloc->Add (Vector (28, 28, 0));
-  lte_initialAlloc->Add (Vector (96, 24, 0));
-  lte_initialAlloc->Add (Vector (96, 32, 0));
-  lte_initialAlloc->Add (Vector (92, 28, 0));
-  lte_initialAlloc->Add (Vector (32, 80, 0));
-  lte_initialAlloc->Add (Vector (32, 88, 0));
-  lte_initialAlloc->Add (Vector (28, 84, 0));
-  // lte_initialAlloc->Add (Vector (96, 80, 0));
-  // lte_initialAlloc->Add (Vector (96, 88, 0));
-  // lte_initialAlloc->Add (Vector (92, 84, 0));
-  // lte_initialAlloc->Add (Vector (1028, 1088, 0));
-  // lte_initialAlloc->Add (Vector (1536, 1084, 0));
-  // lte_initialAlloc->Add (Vector (1536, 1092, 0));
-  // lte_initialAlloc->Add (Vector (1532, 1088, 0));
-  // lte_initialAlloc->Add (Vector (1540, 1088, 0));
-  // lte_initialAlloc->Add (Vector (768, 1724, 0));
-  // lte_initialAlloc->Add (Vector (768, 1732, 0));
-  // lte_initialAlloc->Add (Vector (764, 1728, 0));
-  // lte_initialAlloc->Add (Vector (772, 1728, 0));
-  // lte_initialAlloc->Add (Vector (1280, 1724, 0));
-  // lte_initialAlloc->Add (Vector (1280, 1732, 0));
-  // lte_initialAlloc->Add (Vector (1276, 1728, 0));
-  // lte_initialAlloc->Add (Vector (1284, 1728, 0));
+  lte_initialAlloc->Add (Vector (32, 24, 0)); // A
+  lte_initialAlloc->Add (Vector (32, 32, 0));// A
+  lte_initialAlloc->Add (Vector (28, 28, 0));// A
+  lte_initialAlloc->Add (Vector (28, 32, 0));// A
+  lte_initialAlloc->Add (Vector (96, 24, 0)); // B
+  lte_initialAlloc->Add (Vector (96, 32, 0));// B
+  lte_initialAlloc->Add (Vector (92, 28, 0));// B
+  lte_initialAlloc->Add (Vector (92, 32, 0));// B
+  lte_initialAlloc->Add (Vector (32, 80, 0));// C
+  lte_initialAlloc->Add (Vector (32, 88, 0));// C
+  lte_initialAlloc->Add (Vector (28, 84, 0));// C
+  lte_initialAlloc->Add (Vector (28, 84, 0));// C
 
-  Ptr<ListPositionAllocator> wifi_initialAlloc =
-    CreateObject<ListPositionAllocator> ();
+  Ptr<ListPositionAllocator> wifi_initialAlloc = CreateObject<ListPositionAllocator> ();
 
-    wifi_initialAlloc->Add (Vector(30, 24, 0));
-    wifi_initialAlloc->Add (Vector(30, 32, 0));
-    wifi_initialAlloc->Add (Vector(30, 28, 0));
-    // wifi_initialAlloc->Add (Vector(92, 28, 0));
-  //   wifi_initialAlloc->Add (Vector(80,16,0));
-  //   wifi_initialAlloc->Add (Vector(0,56,0));
-  //   wifi_initialAlloc->Add (Vector(48,40,0));
-  //   wifi_initialAlloc->Add (Vector(96,56,0));
-  //   wifi_initialAlloc->Add (Vector(16,96,0));
-  //   wifi_initialAlloc->Add (Vector(80,96,0));
-
-  /*Rashed Nov 26 2021
-  * I will make changes so that all the devices are close by
-  */
-
-  // Ptr<UniformRandomVariable> xPos = CreateObject<UniformRandomVariable> ();
-  // xPos->SetAttribute ("Min", DoubleValue (16));
-  // xPos->SetAttribute ("Max", DoubleValue (80));
-  // allocator->SetX (xPos);
-  // Ptr<UniformRandomVariable> yPos = CreateObject<UniformRandomVariable> ();
-  // yPos->SetAttribute ("Min", DoubleValue (16));
-  // yPos->SetAttribute ("Max", DoubleValue (120));
-  // allocator->SetY (yPos);
-  // Ptr<UniformRandomVariable> xPos = CreateObject<UniformRandomVariable> ();
-  // xPos->SetAttribute ("Min", DoubleValue (0));
-  // xPos->SetAttribute ("Max", DoubleValue (120));
-  // allocator->SetX (xPos);
-  // Ptr<UniformRandomVariable> yPos = CreateObject<UniformRandomVariable> ();
-  // yPos->SetAttribute ("Min", DoubleValue (0));
-  // yPos->SetAttribute ("Max", DoubleValue (50));
-  // allocator->SetY (yPos);
+  wifi_initialAlloc->Add (Vector (96, 24, 0));
+  wifi_initialAlloc->Add (Vector (98, 32, 0));
+  wifi_initialAlloc->Add (Vector (95, 28, 0));
+  wifi_initialAlloc->Add (Vector (94, 28, 0));
 
   //allocator->AssignStreams (1); // assign consistent stream number to r.vars.
   mobilityUe.SetPositionAllocator (lte_initialAlloc);
   mobilityUe.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   mobilityUe.Install (ueNodesA);
-
-  // My own Wifi Node setup
-  // Ptr<UniformRandomVariable> wifi_xPos = CreateObject<UniformRandomVariable> ();
-  // wifi_xPos->SetAttribute ("Min", DoubleValue (60));
-  // wifi_xPos->SetAttribute ("Max", DoubleValue (64));
-  // allocator->SetX (wifi_xPos);
-
-  // Ptr<UniformRandomVariable> wifi_yPos = CreateObject<UniformRandomVariable> ();
-  // wifi_yPos->SetAttribute ("Min", DoubleValue (24));
-  // wifi_yPos->SetAttribute ("Max", DoubleValue (28));
-  // allocator->SetX (wifi_yPos);
 
   //allocator->AssignStreams (1); // assign consistent stream number to r.vars.
   mobilityUe.SetPositionAllocator (wifi_initialAlloc);

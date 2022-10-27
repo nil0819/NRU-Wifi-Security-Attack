@@ -65,7 +65,7 @@ transport=Udp
 # TXOP duration (ms) for LAA
 lbtTxop=8
 # Base simulation duration (seconds); scaled below
-base_duration=1
+base_duration=5
 # Enable voice instead of FTP on two UEs
 voiceEnabled=1
 # Set to value '0' for LAA SISO, '2' for LAA MIMO
@@ -83,10 +83,12 @@ laaTxMode=2
 #    done
 #done
 
-for udpRate in 155Mbps; do
+for udpRate in 155Mbps 165Mbps 175Mbps 185Mbps 195Mbps 205Mbps 215Mbps 225Mbps 235Mbps 245Mbps 255Mbps 265Mbps 275Mbps 285Mbps 295Mbps; do
 	for energyDetection in -72.0  ; do
 		 for cell in Laa ; do
-		 	for RngRun in  22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41; do
+		 	#for RngRun in  22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 38 39 40 41 42; do
+		 	#for RngRun in  1 2 3 4 5 6 7 8 9 11 12 13 14 15 16 17 18 19 20 21; do
+		 	for RngRun in  22; do
 		 		 duration=$base_duration
 		 		 simTag="eD_${energyDetection}_udpRate_${udpRate}_cellA_${cell}"
 		 		 /usr/bin/time -f '%e %U %S %K %M %x %C' -o "${outputDir}"/time_stats -a \

@@ -553,7 +553,7 @@ void
 Txop::GenerateBackoff (void)
 {
   NS_LOG_FUNCTION (this);
-  m_backoff = m_rng->GetInteger (0, GetCw ());
+  m_backoff = m_rng->GetInteger (0, 3);//GetCw ());
   m_backoffTrace (m_backoff);
   StartBackoffNow (m_backoff);
 }
