@@ -83,7 +83,7 @@ laaTxMode=2
 #    done
 #done
 
-for udpRate in 155Mbps 165Mbps 175Mbps 185Mbps 195Mbps 205Mbps 215Mbps 225Mbps 235Mbps 245Mbps 255Mbps 265Mbps; do
+for udpRate in 275Mbps 295Mbps 315Mbps 335Mbps 355Mbps 375Mbps 395Mbps 415Mbps 435Mbps 455Mbps 475Mbps 495Mbps; do
 	for energyDetection in -72.0  ; do
 		 for cell in Laa ; do
 		 	for RngRun in  22 23 24 25 27 ; do
